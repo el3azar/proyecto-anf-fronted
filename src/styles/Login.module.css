@@ -1,0 +1,66 @@
+.formWrapper {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  background: linear-gradient(135deg, var(--color-neutral) 0%, #d4d4d4 100%);
+}
+.formContainer {
+  max-width: 380px;
+  width: 100%;
+  padding: 2rem;
+  border-radius: 16px;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+  background-color: var(--color-dark);
+  color: var(--text-light);
+}
+.formContainer h1 {
+  font-weight: bold;
+}
+.formContainer p {
+  color: var(--color-neutral);
+}
+.formContainer label {
+  font-weight: 500;
+  margin-bottom: 0.25rem;
+}
+input[type="text"], input[type="password"] {
+  height: 44px;
+  padding: 8px 14px;
+  border: 2px solid var(--color-primary);
+  border-radius: 8px;
+  background-color: #f0f0f0;
+  color: var(--text-dark);
+  font-size: 1rem;
+  transition: border-color 0.2s;
+}
+input:focus {
+  outline: none;
+  border-color: var(--color-accent);
+}
+.inputError {
+  border-color: #e53e3e !important;
+}
+.errorMessage {
+  color: #e57373;
+  font-size: 0.875rem;
+  margin-top: 0.25rem;
+}
+.customBtn {
+  background-color: var(--color-accent);
+  color: var(--color-darkest);
+  border: none;
+  border-radius: 8px;
+  padding: 12px 0;
+  font-size: 1.1rem;
+  font-weight: 600;
+  transition: background 0.2s;
+}
+.customBtn:hover {
+  background-color: var(--color-primary);
+  color: var(--text-light);
+}
+.customBtn:disabled {
+  background-color: var(--color-neutral);
+  cursor: not-allowed;
+}
