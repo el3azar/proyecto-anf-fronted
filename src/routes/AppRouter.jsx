@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { BrowserRouter, Routes, Route,Navigate } from 'react-router-dom';
 import { Toaster } from 'react-hot-toast';
 
 // Layout y Componentes de Ruta
@@ -12,11 +12,11 @@ import DashboardGeneral from '../components/DashboardGeneral';
 import { Empresas } from '../components/empresa/Empresas';
 import { Sectores } from '../components/empresa/Sectores';
 import { Usuarios } from '../components/usuario/Usuarios';
-import { EstadosFinancieros } from '../components/estadosfinancieros/EstadosFinancieros';
 import { CatalogoCuentas } from '../components/catalogo/CatalogoCuentas';
 import { Proyecciones } from '../components/proyeccion/Proyecciones';
-
-
+import CargarEstadoFinanciero from '../components/estadosfinancieros/CargarEstadoFinanciero';
+import HistorialEstadosFinancieros from '../components/estadosfinancieros/HistorialEstadosFinancieros';
+import DetalleEstadoFinanciero from '../components/estadosfinancieros/DetalleEstadoFinanciero';
 
 export default function AppRouter() {
   return (
@@ -54,7 +54,13 @@ export default function AppRouter() {
             <Route path="/usuarios" element={<Usuarios />} />
             <Route path="/catalogo-cuentas" element={<CatalogoCuentas />} />
             <Route path="/proyecciones" element={<Proyecciones />} />
-            <Route path="/estados-financieros" element={<EstadosFinancieros />} />
+
+            <Route path="/estados-financieros/cargar" element={<CargarEstadoFinanciero />} />
+            <Route path="/estados-financieros/historial" element={<HistorialEstadosFinancieros />} />
+            <Route path="/estados-financieros/detalle/:id" element={<DetalleEstadoFinanciero />} />
+
+            
+            <Route path="/estados-financieros" element={<Navigate to="/estados-financieros/cargar" replace />} />
 
           </Route>
         </Route>
