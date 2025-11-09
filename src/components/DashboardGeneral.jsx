@@ -14,7 +14,7 @@ const DashboardGeneral = () => {
   //    El 'to' debe coincidir exactamente con el de las rutas y el menú.
   const items = [
     { label: "Gestionar Empresas", icon: Building, to: "/empresas" },
-    { label: "Gestionar Sectores", icon: Diagram3, to: "/sectores" },
+    { label: "Gestionar Ratios", icon: Diagram3, to: "/ratios" },
     { label: "Gestionar Usuarios", icon: PeopleFill, to: "/usuarios" },
     { label: "Catálogo de Cuentas", icon: JournalCheck, to: "/catalogo-cuentas" }, // <-- AÑADIDO
     { label: "Proyecciones", icon: GraphUpArrow, to: "/proyecciones" },           // <-- AÑADIDO
