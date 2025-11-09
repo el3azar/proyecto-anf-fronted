@@ -10,7 +10,7 @@ import Login from '../components/Login';
 import DashboardGeneral from '../components/DashboardGeneral';
 
 import { Empresas } from '../components/empresa/Empresas';
-import { Sectores } from '../components/ratio/Sectores';
+import { Sectores } from '../components/empresa/Sectores';
 import { Usuarios } from '../components/usuario/Usuarios';
 import { CatalogoCuentas } from '../components/catalogo/CatalogoCuentas';
 import { Proyecciones } from '../components/proyeccion/Proyecciones';
@@ -54,7 +54,6 @@ export default function AppRouter() {
           <Route element={<MainLayout />}>
             <Route path="/dashboard" element={<DashboardGeneral />} />
             <Route path="/empresas" element={<Empresas />} />
-            <Route path="/sectores" element={<Sectores />} />
             <Route path="/usuarios" element={<Usuarios />} />
             <Route path="/catalogo-cuentas" element={<CatalogoCuentas />} />
             <Route path="/proyecciones" element={<Proyecciones />} />
