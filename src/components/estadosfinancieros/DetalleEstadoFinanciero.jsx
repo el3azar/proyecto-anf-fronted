@@ -26,6 +26,7 @@ const DetalleEstadoFinanciero = () => {
 
     useEffect(() => {
         const fetchReporte = async () => {
+            setIsLoading(true); // Asegura que muestre 'cargando' en cada nueva carga
             try {
                 const response = await getEstadoFinancieroById(id);
                 setReporte(response.data);
@@ -38,28 +39,55 @@ const DetalleEstadoFinanciero = () => {
         fetchReporte();
     }, [id]);
 
-    // Usamos useMemo para agrupar y calcular totales solo cuando el reporte cambia
-    const { activos, pasivos, patrimonio, totalActivos, totalPasivos, totalPatrimonio } = useMemo(() => {
-        if (!reporte) return { activos: [], pasivos: [], patrimonio: [], totalActivos: 0, totalPasivos: 0, totalPatrimonio: 0 };
+    // --- LÓGICA CONDICIONAL MEJORADA ---
+    // Este hook ahora decide qué datos calcular basado en el tipo de reporte
+    const processedData = useMemo(() => {
+        if (!reporte) return null;
 
+        const sumSaldos = (arr) => arr.reduce((sum, item) => sum + item.saldo, 0);
+
+        if (reporte.tipoReporte === 'ESTADO_RESULTADOS') {
+            const ingresos = reporte.lineas.filter(l => l.codigoCuenta.startsWith('5'));
+            const gastos = reporte.lineas.filter(l => l.codigoCuenta.startsWith('4'));
+
+            const totalIngresos = sumSaldos(ingresos);
+            const totalGastos = sumSaldos(gastos);
+
+            return {
+                type: 'Estado de Resultados',
+                ingresos,
+                gastos,
+                totalIngresos,
+                totalGastos,
+                utilidadNeta: totalIngresos - totalGastos
+            };
+        }
+
+        // Por defecto, asumimos Balance General
         const activos = reporte.lineas.filter(l => l.codigoCuenta.startsWith('1'));
         const pasivos = reporte.lineas.filter(l => l.codigoCuenta.startsWith('2'));
         const patrimonio = reporte.lineas.filter(l => l.codigoCuenta.startsWith('3'));
 
-        const sumSaldos = (arr) => arr.reduce((sum, item) => sum + item.saldo, 0);
+        const totalActivos = sumSaldos(activos);
+        const totalPasivos = sumSaldos(pasivos);
+        const totalPatrimonio = sumSaldos(patrimonio);
 
         return {
-            activos, pasivos, patrimonio,
-            totalActivos: sumSaldos(activos),
-            totalPasivos: sumSaldos(pasivos),
-            totalPatrimonio: sumSaldos(patrimonio),
+            type: 'Balance General',
+            activos,
+            pasivos,
+            patrimonio,
+            totalActivos,
+            totalPasivos,
+            totalPatrimonio
         };
+
     }, [reporte]);
 
     if (isLoading) return <p>Cargando detalle del reporte...</p>;
-    if (!reporte) return <p>No se encontró el reporte.</p>;
+    if (!reporte || !processedData) return <p>No se encontró o no se pudo procesar el reporte.</p>;
 
-    // Función de ayuda para renderizar una sección de la tabla
+    // Función de ayuda para renderizar una sección (reutilizable)
     const renderSection = (title, items, total) => (
         <section className={localStyles.section}>
             <h4 className={localStyles.sectionTitle}>{title}</h4>
@@ -95,18 +123,41 @@ const DetalleEstadoFinanciero = () => {
                         <h3>{reporte.tipoReporte.replace('_', ' ')} - {reporte.anio}</h3>
                     </header>
                     
-                    {renderSection('Activos', activos, totalActivos)}
-                    {renderSection('Pasivos', pasivos, totalPasivos)}
-                    {renderSection('Patrimonio', patrimonio, totalPatrimonio)}
+                    {/* --- RENDERIZADO CONDICIONAL --- */}
+                    {/* Ahora, decidimos qué renderizar basado en los datos procesados */}
+                    
+                    {processedData.type === 'Balance General' && (
+                        <>
+                            {renderSection('Activos', processedData.activos, processedData.totalActivos)}
+                            {renderSection('Pasivos', processedData.pasivos, processedData.totalPasivos)}
+                            {renderSection('Patrimonio', processedData.patrimonio, processedData.totalPatrimonio)}
 
-                    <table className={localStyles.detailTable}>
-                        <tbody>
-                            <tr className={localStyles.grandTotalRow}>
-                                <td>Total Pasivo y Patrimonio</td>
-                                <td className={localStyles.numberCell}>{formatCurrency(totalPasivos + totalPatrimonio)}</td>
-                            </tr>
-                        </tbody>
-                    </table>
+                            <table className={localStyles.detailTable}>
+                                <tbody>
+                                    <tr className={localStyles.grandTotalRow}>
+                                        <td>Total Pasivo y Patrimonio</td>
+                                        <td className={localStyles.numberCell}>{formatCurrency(processedData.totalPasivos + processedData.totalPatrimonio)}</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </>
+                    )}
+
+                    {processedData.type === 'Estado de Resultados' && (
+                        <>
+                            {renderSection('Ingresos', processedData.ingresos, processedData.totalIngresos)}
+                            {renderSection('Costos y Gastos', processedData.gastos, processedData.totalGastos)}
+
+                            <table className={localStyles.detailTable}>
+                                <tbody>
+                                    <tr className={localStyles.grandTotalRow}>
+                                        <td>Utilidad Neta</td>
+                                        <td className={localStyles.numberCell}>{formatCurrency(processedData.utilidadNeta)}</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </>
+                    )}
                 </div>
             </div>
         </>
