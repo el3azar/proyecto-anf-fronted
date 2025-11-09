@@ -63,8 +63,6 @@ export const proyeccionesSubMenuLinks = [
  * Enfocado en la carga de datos y la visualización de reportes.
  */
 export const estadosFinancierosSubMenuLinks = [
-  { to: '/estados-financieros', label: 'Cargar Estado Financiero' },
-  { to: '/estados-financieros/historial', label: 'Ver Historial' },
-  { to: '/estados-financieros/balance-general', label: 'Balance General' },
-  { to: '/estados-financieros/estado-resultados', label: 'Estado de Resultados' },
+  { to: '/estados-financieros/cargar', label: 'Cargar Nuevo Reporte' },
+  { to: '/estados-financieros/historial', label: 'Historial de Reportes' },
 ];
