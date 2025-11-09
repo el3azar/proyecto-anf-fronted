@@ -10,11 +10,16 @@ import Login from '../components/Login';
 import DashboardGeneral from '../components/DashboardGeneral';
 
 import { Empresas } from '../components/empresa/Empresas';
-import { Sectores } from '../components/empresa/Sectores';
+import { Sectores } from '../components/ratio/Sectores';
 import { Usuarios } from '../components/usuario/Usuarios';
 import { EstadosFinancieros } from '../components/estadosfinancieros/EstadosFinancieros';
 import { CatalogoCuentas } from '../components/catalogo/CatalogoCuentas';
 import { Proyecciones } from '../components/proyeccion/Proyecciones';
+import { CategoriaRatio } from '../components/ratio/CategoriaRatio';
+import { TipoRatio } from '../components/ratio/TipoRatio';
+import { ParametroSector } from '../components/ratio/ParametroSector';
+import { Ratio } from '../components/ratio/Ratio';
+
 
 
 
@@ -56,6 +61,12 @@ export default function AppRouter() {
             <Route path="/proyecciones" element={<Proyecciones />} />
             <Route path="/estados-financieros" element={<EstadosFinancieros />} />
 
+            {/*Rutas para los Ratios*/}
+            <Route path="/sectores" element={<Sectores />} />
+            <Route path="/categoria_ratio" element={<CategoriaRatio />} />
+            <Route path="/tipo_ratio" element={<TipoRatio />} />
+            <Route path="/parametro_sector" element={<ParametroSector/>}/>
+            <Route path="/ratios" element={<Ratio/>}/>
           </Route>
         </Route>
         
