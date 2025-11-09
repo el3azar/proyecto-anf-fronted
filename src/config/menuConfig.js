@@ -5,7 +5,7 @@ import { House, Building, PeopleFill, Diagram3, FileEarmarkText, JournalCheck, G
 export const mainLinks = [
   { to: "/dashboard", label: "Dashboard", icon: House },
   { to: "/empresas", label: "Empresas", icon: Building },
-  { to: "/sectores", label: "Sectores", icon: Diagram3 },
+  { to: "/ratios", label: "Ratios", icon: Diagram3 },
   { to: "/usuarios", label: "Usuarios", icon: PeopleFill },
   
   // --- INICIO DE LAS NUEVAS OPCIONES ---
@@ -27,8 +27,11 @@ export const empresasSubMenuLinks = [
 ];
 
 export const sectoresSubMenuLinks = [
-  { to: '/sectores', label: 'Ver Sectores' },
-  { to: '/sectores/nuevo', label: 'Registrar Sector' },
+  { to: '/ratios', label: 'Ratio' },
+  {to: '/categoria_ratio', label: 'Categoria'},
+  {to: '/tipo_ratio', label: 'Tipo'},
+  {to: '/parametro_sector', label: 'Parametro'},
+  { to: '/sectores', label: 'Sector' },
 ];
 
 export const usuariosSubMenuLinks = [
