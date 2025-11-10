@@ -47,10 +47,11 @@ export const Ratio = () => {
   return (
     <div style={{ padding: '20px' }}>
       <SubMenu links={sectoresSubMenuLinks} />
-      <h1>Gestión de tipo de ratios</h1>
 
       <div style={{ marginTop: '2rem' }}>
         <Tabla
+          titulo="Gestión de Ratio"
+          textoBotonNuevo="Nuevo Ratio"
           columnas={columnasSectores}
           datos={datosSectores}
           enEditar={handleEditar}

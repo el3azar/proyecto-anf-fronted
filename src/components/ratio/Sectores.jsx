@@ -54,10 +54,12 @@ export const Sectores = () => {
     // Puedes agregar un padding o margen al contenedor principal
     <div style={{ padding: '20px' }}>
       <SubMenu links={sectoresSubMenuLinks} />
-      <h1>Gestión de Sectores</h1>
+     
       {/* Añadimos un margen superior a la tabla */}
       <div style={{ marginTop: '2rem' }}>
          <Tabla
+          titulo="Gestión de Sectores"
+          textoBotonNuevo="Nuevo Sector"
           columnas={columnasSectores}
           datos={datosSectores}
           enEditar={handleEditar}

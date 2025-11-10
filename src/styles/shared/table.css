@@ -1,87 +1,142 @@
-/* Contenedor principal de la tabla para darle sombra y bordes redondeados */
-.tabla-container {
+/* 
+  Archivo: /styles/shared/vista-tabla.css
+  Estilos DEFINITIVOS y UNIFICADOS para todas las vistas con tablas.
+*/
+
+/* 
+  NOTA: Asegúrate de que estas variables estén definidas en un archivo global 
+  como index.css para que estén disponibles en toda la aplicación.
+*/
+:root {
+  --color-darkest: #182c3f;
+  --background-card: #ffffff;
+  --border-color: #e9ecef;
+  --color-primary: #207B25; /* Verde principal */
+  --color-danger: #dc3545;  /* Rojo para eliminar */
+  --color-secondary-text: #6c757d; /* Gris para iconos */
+}
+
+/* --- Contenedor Principal de la Vista --- */
+.view-container {
+  padding: 1.5rem;
+  background-color: var(--background-card);
   border-radius: 8px;
-  overflow: hidden; /* Asegura que los bordes redondeados se apliquen a la tabla interior */
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-}
-
-/* Estilos base de la tabla */
-.tabla {
+  box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+  border: 1px solid var(--border-color);
   width: 100%;
-  border-collapse: collapse; /* Une los bordes de las celdas */
 }
 
-/* Estilo para el encabezado de la tabla */
-.tabla thead {
-  background-color: #207B25;
+/* --- Encabezado de la Vista (Título y Botón Principal) --- */
+.view-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2rem;
+  padding-bottom: 1.5rem;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.view-title {
+  font-size: 1.75rem;
+  font-weight: 600;
+  color: var(--color-darkest);
+  margin: 0;
+}
+
+/* --- Estilos de Botones --- */
+/* Botón Principal (ej. "Nuevo Sector") */
+.btn-primary {
+  background-color: var(--color-darkest); 
+  border: 2px solid var(--color-darkest);
   color: white;
+  padding: 0.6rem 1.2rem; /* Ajuste ligero */
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 0.95rem; /* Consistencia de tamaño */
+  cursor: pointer;
+  transition: all 0.2s ease-in-out;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+.btn-primary:hover {
+  background-color: transparent;
+  color: var(--color-darkest);
 }
 
-/* Estilo para las celdas del encabezado (th) y las celdas de datos (td) */
-.tabla th,
-.tabla td {
-  padding: 12px 15px;
+/* Botones de Ícono para Acciones en Tablas */
+.btn-icon {
+  background: transparent;
+  border: none;
+  padding: 0;
+  border-radius: 50%; /* Círculo perfecto */
+  width: 36px;
+  height: 36px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background-color 0.2s, color 0.2s;
+  color: var(--color-secondary-text);
+  font-size: 1rem; /* Tamaño del ícono interno */
+}
+.btn-icon:hover {
+  background-color: #e9ecef; /* Fondo gris claro al pasar el mouse */
+}
+/* Colores específicos para cada acción en hover */
+.btn-icon.edit:hover { color: var(--color-primary); }
+.btn-icon.delete:hover { color: var(--color-danger); }
+.btn-icon.view:hover { color: #0d6efd; /* Azul para "ver" */ }
+.btn-icon.calculate:hover { color: #fd7e14; /* Naranja para "calcular" */ }
+
+
+/* --- Estilos de la Tabla --- */
+.table {
+  border-collapse: collapse;
+  width: 100%;
+}
+
+.table thead th {
+  background-color: var(--color-darkest);
+  color: white;
+  font-weight: 600;
+  text-transform: uppercase;
+  font-size: 0.8rem;
+  padding: 1rem 1.5rem;
   text-align: left;
-  border-bottom: 1px solid #dddddd; /* Línea divisoria entre filas */
+  vertical-align: middle;
 }
 
-/* Estilo para las filas del cuerpo de la tabla */
-.tabla tbody tr {
-  background-color: #ffffff;
+.table tbody tr {
+  border-top: 1px solid var(--border-color); /* <-- ESTE ES EL CAMBIO */
+  transition: background-color 0.2s ease;
 }
 
-/* Efecto hover para las filas */
-.tabla tbody tr:hover {
-  background-color: #f5f5f5;
+
+.table tbody tr:hover {
+  background-color: #f8f9fa; /
 }
 
-/* Contenedor para los iconos de acciones para alinearlos */
-.acciones-cell {
+.table tbody td {
+  padding: 1.25rem 1.5rem;
+  vertical-align: middle;
+  color: #343a40;
+}
+
+/* Clases de utilidad */
+.actions-column {
+  width: 1%; /* Truco para forzar a la columna a tener el mínimo ancho posible */
+  white-space: nowrap; /* Evita que los iconos se partan en varias líneas */
+}
+
+
+.actions-cell {
   display: flex;
   align-items: center;
-  gap: 10px; /* Espacio entre los iconos */
+  justify-content: flex-end; /* Mantiene los iconos pegados a la derecha de su (ahora más pequeña) celda */
+  gap: 8px; 
 }
 
-/* Estilo para los botones de acciones */
-.acciones-cell button {
-  background: none;
-  border: none;
-  cursor: pointer;
-  font-size: 1.1rem; /* Tamaño de los iconos */
-  color: #333;
-}
-
-.acciones-cell button:hover {
-  opacity: 0.7;
-}
-
-/* ... tus estilos existentes ... */
-
-/* Contenedor para la sección de arriba de la tabla (donde irá el botón) */
-.tabla-header {
-  display: flex;
-  justify-content: flex-end; /* Alinea el contenido (el botón) a la derecha */
-  margin-bottom: 1rem; /* Crea un espacio entre el botón y la tabla */
-}
-
-/* Estilo para el botón 'Nuevo' */
-.btn-nuevo {
-  background-color: #207B25;
-  color: white;
-  padding: 10px 20px;
-  border: none;
-  border-radius: 6px;
-  font-size: 1rem;
-  font-weight: bold;
-  cursor: pointer;
-  transition: background-color 0.2s ease; /* Efecto suave al pasar el ratón */
-}
-
-.btn-nuevo:hover {
-  background-color: #1a631e; /* Un verde un poco más oscuro para el hover */
-}
-
-/* Nuevo contenedor general para el botón y la tabla juntos */
-.tabla-component-wrapper {
-  width: 100%;
+.table-responsive {
+    overflow-x: auto;
 }
