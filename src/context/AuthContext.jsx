@@ -14,13 +14,18 @@ export function AuthProvider({ children }) {
     if (token) setIsAuthenticated(true);
   }, []);
 
-  const login = async (userName, contrasena) => {
-    const data = await authService.login(userName, contrasena);
-    sessionStorage.setItem(TOKEN_KEY, data.token);
-    setUser({ userName: data.userName, rol: data.rol });
-    setIsAuthenticated(true);
-    return data;
-  };
+const login = async (userName, contrasena) => {
+  const data = await authService.login(userName, contrasena);
+  sessionStorage.setItem(TOKEN_KEY, data.token);
+  setUser({ 
+    userName: data.userName, 
+    rol: data.rol, 
+    id: data.id,
+    accesos: data.accesos  // guarda los accesos
+  });
+  setIsAuthenticated(true);
+  return data;
+};
 
   const logout = () => {
     sessionStorage.removeItem(TOKEN_KEY);

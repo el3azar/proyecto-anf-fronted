@@ -66,7 +66,7 @@ export const CargaManualVentas = () => {
                     <tbody>
                         {fields.map((field, index) => (
                             <tr key={field.id}>
-                                <td><input type="date" className="form-control" {...register(`ventas.${index}.fechaVenta`, { required: true })} /></td>
+                                <td><input type="month" className="form-control" {...register(`ventas.${index}.fechaVenta`, { required: true })} /></td>
                                 <td><input type="number" step="0.01" className="form-control" {...register(`ventas.${index}.montoVenta`, { required: true, valueAsNumber: true })} /></td>
                                 <td><input type="text" className="form-control" {...register(`ventas.${index}.observacion`)} /></td>
                                 <td className="text-end">
