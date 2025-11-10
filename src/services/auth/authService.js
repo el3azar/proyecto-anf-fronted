@@ -2,11 +2,11 @@
 const API_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:8080/api";
 
 export const authService = {
-  login: async (username, password) => {
+  login: async (userName, contrasena) => {
     const resp = await fetch(`${API_URL}/auth/login`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ username, password })
+      body: JSON.stringify({ userName, contrasena })
     });
 
     // intenta parsear JSON aún en error para usar mensaje del backend si existe
