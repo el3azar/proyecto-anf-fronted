@@ -41,48 +41,77 @@ const DetalleEstadoFinanciero = () => {
 
     // --- LÓGICA CONDICIONAL MEJORADA ---
     // Este hook ahora decide qué datos calcular basado en el tipo de reporte
-    const processedData = useMemo(() => {
-        if (!reporte) return null;
+    // ===== INICIO DEL CÓDIGO CORREGIDO PARA DetalleEstadoFinanciero.jsx =====
 
-        const sumSaldos = (arr) => arr.reduce((sum, item) => sum + item.saldo, 0);
+const processedData = useMemo(() => {
+    if (!reporte) return null;
 
-        if (reporte.tipoReporte === 'ESTADO_RESULTADOS') {
-            const ingresos = reporte.lineas.filter(l => l.codigoCuenta.startsWith('5'));
-            const gastos = reporte.lineas.filter(l => l.codigoCuenta.startsWith('4'));
+    const sumSaldos = (arr) => arr.reduce((sum, item) => sum + item.saldo, 0);
 
-            const totalIngresos = sumSaldos(ingresos);
-            const totalGastos = sumSaldos(gastos);
+    if (reporte.tipoReporte === 'ESTADO_RESULTADOS') {
+        // 1. FILTROS CORREGIDOS Y SIMPLIFICADOS
+        // Ingresos de Operación son todas las cuentas de Ingresos de Seguros
+        const ingresosOperacion = reporte.lineas.filter(l => l.codigoCuenta.startsWith('5102'));
+        
+        // Costos de Operación son todas las cuentas de Costos de Seguros
+        const costosOperacion = reporte.lineas.filter(l => l.codigoCuenta.startsWith('4102') || l.codigoCuenta.startsWith('4103'));
+        
+        // Gastos de Operación son los de Admin (42...) y Financieros (4301...)
+        const gastosOperacion = reporte.lineas.filter(l => l.codigoCuenta.startsWith('42') || l.codigoCuenta.startsWith('4301'));
+        
+        // Otros Ingresos y el Impuesto se mantienen separados
+        const otrosIngresos = reporte.lineas.filter(l => l.codigoCuenta.startsWith('5204'));
+        const impuestoRenta = reporte.lineas.filter(l => l.codigoCuenta.startsWith('4302'));
 
-            return {
-                type: 'Estado de Resultados',
-                ingresos,
-                gastos,
-                totalIngresos,
-                totalGastos,
-                utilidadNeta: totalIngresos - totalGastos
-            };
-        }
+        // 2. Cálculo de totales (esta parte no cambia)
+        const totalIngresosOp = sumSaldos(ingresosOperacion);
+        const totalCostosOp = sumSaldos(costosOperacion);
+        const totalGastosOp = sumSaldos(gastosOperacion);
+        const totalOtrosIngresos = sumSaldos(otrosIngresos);
+        const totalImpuesto = sumSaldos(impuestoRenta);
 
-        // Por defecto, asumimos Balance General
-        const activos = reporte.lineas.filter(l => l.codigoCuenta.startsWith('1'));
-        const pasivos = reporte.lineas.filter(l => l.codigoCuenta.startsWith('2'));
-        const patrimonio = reporte.lineas.filter(l => l.codigoCuenta.startsWith('3'));
+        // 3. Replicamos la matemática del PDF (esta parte no cambia)
+        const utilidadAntesGastos = totalIngresosOp - totalCostosOp;
+        const utilidadOperacion = utilidadAntesGastos - totalGastosOp;
+        const utilidadAntesImpuesto = utilidadOperacion + totalOtrosIngresos;
+        const utilidadNeta = utilidadAntesImpuesto - totalImpuesto;
 
-        const totalActivos = sumSaldos(activos);
-        const totalPasivos = sumSaldos(pasivos);
-        const totalPatrimonio = sumSaldos(patrimonio);
-
+        // 4. Devolvemos el objeto para la UI (esta parte no cambia)
         return {
-            type: 'Balance General',
-            activos,
-            pasivos,
-            patrimonio,
-            totalActivos,
-            totalPasivos,
-            totalPatrimonio
+            type: 'Estado de Resultados',
+            ingresosOperacion,
+            costosOperacion,
+            gastosOperacion,
+            otrosIngresos,
+            impuestoRenta,
+            totalIngresosOp,
+            totalCostosOp,
+            totalGastosOp,
+            totalOtrosIngresos,
+            totalImpuesto,
+            utilidadAntesGastos,
+            utilidadOperacion,
+            utilidadAntesImpuesto,
+            utilidadNeta
         };
+    }
+    
+    // La lógica del Balance General se mantiene igual...
+    const activos = reporte.lineas.filter(l => l.codigoCuenta.startsWith('1'));
+    const pasivos = reporte.lineas.filter(l => l.codigoCuenta.startsWith('2'));
+    const patrimonio = reporte.lineas.filter(l => l.codigoCuenta.startsWith('3'));
+    const totalActivos = sumSaldos(activos);
+    const totalPasivos = sumSaldos(pasivos);
+    const totalPatrimonio = sumSaldos(patrimonio);
+    return {
+        type: 'Balance General',
+        activos, pasivos, patrimonio,
+        totalActivos, totalPasivos, totalPatrimonio
+    };
 
-    }, [reporte]);
+}, [reporte]);
+
+// ===== FIN DEL CÓDIGO CORREGIDO =====
 
     if (isLoading) return <p>Cargando detalle del reporte...</p>;
     if (!reporte || !processedData) return <p>No se encontró o no se pudo procesar el reporte.</p>;
@@ -143,11 +172,40 @@ const DetalleEstadoFinanciero = () => {
                         </>
                     )}
 
+                  {/* --- INICIO DEL BLOQUE CORREGIDO PARA ESTADO DE RESULTADOS --- */}
                     {processedData.type === 'Estado de Resultados' && (
                         <>
-                            {renderSection('Ingresos', processedData.ingresos, processedData.totalIngresos)}
-                            {renderSection('Costos y Gastos', processedData.gastos, processedData.totalGastos)}
+                            {/* Mostramos cada bloque que calculamos */}
+                            {renderSection('Ingresos de Operación', processedData.ingresosOperacion, processedData.totalIngresosOp)}
+                            {renderSection('Costos de Operación', processedData.costosOperacion, processedData.totalCostosOp)}
 
+                            {/* Añadimos el primer subtotal intermedio */}
+                            <table className={localStyles.detailTable}>
+                                <tbody>
+                                    <tr className={localStyles.subtotalRow} style={{ fontWeight: 'bold' }}>
+                                        <td>Utilidad antes de gastos</td>
+                                        <td className={localStyles.numberCell}>{formatCurrency(processedData.utilidadAntesGastos)}</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+
+                            {renderSection('Gastos de Operación', processedData.gastosOperacion, processedData.totalGastosOp)}
+
+                            {/* Añadimos el segundo subtotal intermedio */}
+                            <table className={localStyles.detailTable}>
+                                <tbody>
+                                    <tr className={localStyles.subtotalRow} style={{ fontWeight: 'bold' }}>
+                                        <td>Utilidad de operación</td>
+                                        <td className={localStyles.numberCell}>{formatCurrency(processedData.utilidadOperacion)}</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                            
+                            {/* Mostramos los últimos bloques */}
+                            {renderSection('Otros Ingresos (neto)', processedData.otrosIngresos, processedData.totalOtrosIngresos)}
+                            {renderSection('Impuesto sobre la Renta', processedData.impuestoRenta, processedData.totalImpuesto)}
+                            
+                            {/* Y finalmente, el total general */}
                             <table className={localStyles.detailTable}>
                                 <tbody>
                                     <tr className={localStyles.grandTotalRow}>
@@ -158,6 +216,7 @@ const DetalleEstadoFinanciero = () => {
                             </table>
                         </>
                     )}
+                    {/* --- FIN DEL BLOQUE CORREGIDO --- */}
                 </div>
             </div>
         </>
