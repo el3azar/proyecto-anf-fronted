@@ -13,7 +13,6 @@ import { Empresas } from '../components/empresa/Empresas';
 import { Sectores } from '../components/empresa/Sectores';
 import { Usuarios } from '../components/usuario/Usuarios';
 import { CatalogoCuentas } from '../components/catalogo/CatalogoCuentas';
-import { Proyecciones } from '../components/proyeccion/Proyecciones';
 import CargarEstadoFinanciero from '../components/estadosfinancieros/CargarEstadoFinanciero';
 import HistorialEstadosFinancieros from '../components/estadosfinancieros/HistorialEstadosFinancieros';
 import DetalleEstadoFinanciero from '../components/estadosfinancieros/DetalleEstadoFinanciero';
@@ -21,6 +20,8 @@ import { CategoriaRatio } from '../components/ratio/CategoriaRatio';
 import { TipoRatio } from '../components/ratio/TipoRatio';
 import { ParametroSector } from '../components/ratio/ParametroSector';
 import { Ratio } from '../components/ratio/Ratio';
+import { Proyecciones } from '../components/proyeccion/Proyecciones'; // Usamos el componente contenedor
+import HistorialVentas from '../components/proyeccion/HistorialVentas'; // Importamos el nuevo componente de historial
 
 export default function AppRouter() {
   return (
@@ -56,7 +57,11 @@ export default function AppRouter() {
             <Route path="/empresas" element={<Empresas />} />
             <Route path="/usuarios" element={<Usuarios />} />
             <Route path="/catalogo-cuentas" element={<CatalogoCuentas />} />
-            <Route path="/proyecciones" element={<Proyecciones />} />
+
+
+            <Route path="/proyecciones/cargar" element={<Proyecciones />} />
+            <Route path="/proyecciones/historial" element={<HistorialVentas />} />
+            <Route path="/proyecciones" element={<Navigate to="/proyecciones/cargar" replace />} />
 
             <Route path="/estados-financieros/cargar" element={<CargarEstadoFinanciero />} />
             <Route path="/estados-financieros/historial" element={<HistorialEstadosFinancieros />} />
