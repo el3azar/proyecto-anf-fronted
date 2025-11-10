@@ -1,64 +1,133 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import SubMenu from '../shared/SubMenu';
 import { sectoresSubMenuLinks } from '../../config/menuConfig';
-import Tabla from '../shared/Tabla'; 
+import Tabla from '../shared/Tabla';
+import { CategoriaRatioFormModal } from './CategoriaRatioFormModal';
+import { Notifier } from '../../utils/Notifier';
+import { createCategoriaRatio, deleteCategoriaRatio, getCategoriasRatio, updateCategoriaRatio } from '../../services/ratio/CategoriaRatio';
+
 
 export const CategoriaRatio = () => {
-  const datosSectores = [
-    { id: 1, nombre: 'Tecnología', descripcion: 'Sector de alta tecnología'},
-    { id: 2, nombre: 'Salud', descripcion: 'Sector de cuidados de la salud' },
-    { id: 3, nombre: 'Finanzas', descripcion: 'Sector de servicios financieros'},
-  ];
+  const [categoriasRatio, setCategoriasRatio] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [editingCategoria, setEditingCategoria] = useState(null);
 
-  const columnasSectores = [
-    {
-      Header: 'ID',
-      accessor: 'id',
-    },
-    {
-      Header: 'Nombre del Sector',
-      accessor: 'nombre',
-    },
-    {
-      Header: 'Descripción',
-      accessor: 'descripcion',
+  const fetchCategorias = async () => {
+    try {
+      setLoading(true);
+      const data = await getCategoriasRatio();
+      setCategoriasRatio(data);
+    } catch (error) {
+      Notifier.error('No se pudieron cargar las categorías.');
+    } finally {
+      setLoading(false);
     }
+  };
+
+  useEffect(() => {
+    fetchCategorias();
+  }, []);
+
+  const columnas = [
+    // <<< CORRECCIÓN 1: Usar el accessor correcto de la API
+    { Header: 'ID', accessor: 'idCategoriaRatio' },
+    { Header: 'Nombre de la Categoría', accessor: 'nombreTipo' },
+    { Header: 'Descripción', accessor: 'descripcion' },
   ];
 
-   const handleNuevoRatio = () => {
-    console.log("Se presionó el botón para crear un nuevo ratio.");
-    // Aquí puedes agregar la lógica para abrir un modal o navegar a una página de creación.
+  const handleNuevaCategoria = () => {
+    setEditingCategoria(null);
+    setIsModalOpen(true);
   };
 
-  const handleEditar = (sector) => {
-    console.log('Editando:', sector);
+  const handleEditar = (categoria) => {
+    setEditingCategoria({
+      // <<< CORRECCIÓN 2: Mapear desde la propiedad correcta
+      id: categoria.idCategoriaRatio,
+      nombre: categoria.nombreTipo, 
+      descripcion: categoria.descripcion,
+    });
+    setIsModalOpen(true);
   };
 
-  const handleVer = (sector) => {
-    console.log('Viendo:', sector);
+  const handleCloseModal = () => {
+    setIsModalOpen(false);
   };
 
-  const handleEliminar = (sector) => {
-    console.log('Eliminando:', sector);
+  const handleSave = async (formData, id) => {
+    const payload = {
+      nombreTipo: formData.nombre,
+      descripcion: formData.descripcion,
+    };
+
+    const isEditing = !!id;
+
+    const loadingToastId = Notifier.loading(isEditing ? "Actualizando..." : "Guardando...");
+
+    try {
+      if (isEditing) {
+        await updateCategoriaRatio(id, payload);
+      } else {
+        await createCategoriaRatio(payload);
+      }
+      Notifier.dismiss(loadingToastId);
+      Notifier.success(`¡Categoría ${isEditing ? 'actualizada' : 'creada'} exitosamente!`);
+      handleCloseModal();
+      fetchCategorias();
+    } catch (error) {
+      Notifier.dismiss(loadingToastId);
+      Notifier.error(`Error al ${isEditing ? 'actualizar' : 'crear'}.`);
+    }
+  };
+
+  const handleEliminar = async (categoria) => {
+    const result = await Notifier.confirm({
+      title: `¿Eliminar "${categoria.nombreTipo}"?`,
+      text: "Esta acción no se puede deshacer.",
+    });
+
+    if (result.isConfirmed) {
+      const loadingToastId = Notifier.loading("Eliminando...");
+      try {
+        // <<< CORRECCIÓN 3: Pasar el ID correcto a la función de eliminar
+        await deleteCategoriaRatio(categoria.idCategoriaRatio);
+        Notifier.dismiss(loadingToastId);
+        Notifier.success("Categoría eliminada.");
+        fetchCategorias();
+      } catch (error) {
+        Notifier.dismiss(loadingToastId);
+        Notifier.error("No se pudo eliminar la categoría.");
+      }
+    }
   };
 
   return (
-    // Puedes agregar un padding o margen al contenedor principal
     <div style={{ padding: '20px' }}>
       <SubMenu links={sectoresSubMenuLinks} />
-      <h1>Gestión de Ratios</h1>
       
-      {/* Añadimos un margen superior a la tabla */}
       <div style={{ marginTop: '2rem' }}>
-        <Tabla
-          columnas={columnasSectores}
-          datos={datosSectores}
-          enEditar={handleEditar}
-          enVer={handleVer}
-          enEliminar={handleEliminar}
-          onNuevoClick={handleNuevoRatio}
-        />
+        {loading ? (
+          <p>Cargando categorías...</p>
+        ) : (
+          <Tabla
+            titulo="Gestión de Categorías"
+            textoBotonNuevo="Nueva Categoría"
+            columnas={columnas}
+            datos={categoriasRatio}
+            enEditar={handleEditar}
+            enEliminar={handleEliminar}
+            onNuevoClick={handleNuevaCategoria}
+          />
+        )}
       </div>
+
+      <CategoriaRatioFormModal
+        show={isModalOpen}
+        onClose={handleCloseModal}
+        onSave={handleSave}
+        initialData={editingCategoria}
+      />
     </div>
   );
 };
