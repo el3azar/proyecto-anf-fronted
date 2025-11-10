@@ -53,9 +53,8 @@ export const catalogoCuentasSubMenuLinks = [
  * Orientado a la creación y visualización de análisis.
  */
 export const proyeccionesSubMenuLinks = [
-  { to: '/proyecciones', label: 'Generar Nueva Proyección' },
-  { to: '/proyecciones/historial', label: 'Ver Proyecciones Guardadas' },
-  { to: '/proyecciones/escenarios', label: 'Análisis de Escenarios' },
+  { to: '/proyecciones/cargar', label: 'Cargar Ventas Históricas' },
+  { to: '/proyecciones/historial', label: 'Ver Historial de Ventas' },
 ];
 
 /**
