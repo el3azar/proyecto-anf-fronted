@@ -1,47 +1,187 @@
-import React from 'react';
+// src/components/ratio/Ratio.js
+
+import React, { useState, useEffect } from 'react';
 import SubMenu from '../shared/SubMenu';
 import { sectoresSubMenuLinks } from '../../config/menuConfig';
-import Tabla from '../shared/Tabla'; 
-// El import de ParametroSector no se está usando, lo puedes quitar si no es necesario.
-// import { ParametroSector } from './ParametroSector';
+import Tabla from '../shared/Tabla';
+import { Notifier } from '../../utils/Notifier';
+
+// --- Servicios a utilizar ---
+import { getRatios, createRatio, updateRatio, deleteRatio } from '../../services/ratio/ratioService';
+
+// --- El Modal ---
+import { RatioFormModal } from './RatioFormModal';
+import { getCategoriasRatio } from '../../services/ratio/CategoriaRatio';
+import { getParametros } from '../../services/ratio/parametroSector';
+import { getEmpresas } from '../../services/empresa/empresaService';
 
 export const Ratio = () => {
-  const datosSectores = [
-    { id: 1, categoria: 'Tecnología', tipo:'A', parametro: 'Sector de alta tecnología', anio: 'dias', periodo: '2022-2024'},
-    { id: 2, categoria: 'Salud', tipo:'B', parametro: 'Sector de cuidados de la salud', anio: 'años', periodo: '2022-2024'},
-    { id: 3, categoria: 'Finanzas', tipo: 'C',parametro: 'Sector de servicios financieros', anio: 'monetaria', periodo: '2022-2024' },
+  // --- Estados para los datos ---
+  const [ratios, setRatios] = useState([]);
+  const [categorias, setCategorias] = useState([]);
+  const [parametros, setParametros] = useState([]);
+  const [empresas, setEmpresas] = useState([]);
+  
+  // --- Estados para la UI ---
+  const [loading, setLoading] = useState(true);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [editingRatio, setEditingRatio] = useState(null);
+
+  // --- Carga de datos inicial ---
+  const fetchData = async () => {
+    try {
+      setLoading(true);
+      const [ratiosData, categoriasData, parametrosData, empresasData] = await Promise.all([
+        getRatios(),
+        getCategoriasRatio(),
+        getParametros(),
+        getEmpresas(),
+      ]);
+      setRatios(ratiosData);
+      setCategorias(categoriasData);
+      setParametros(parametrosData);
+      setEmpresas(empresasData);
+    } catch (error) {
+      Notifier.error('No se pudieron cargar los datos.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchData();
+  }, []);
+
+  // --- Definición de las columnas para la tabla ---
+  const columnas = [
+    { 
+      Header: 'ID', 
+      accessor: 'id_ratio' 
+    },
+    {
+      Header: 'EMPRESA',
+      accessor: row => row.empresa ? row.empresa.nombre_empresa : 'N/A',
+    },
+    {
+      Header: 'CATEGORÍA',
+      accessor: row => row.categoriaRatio ? row.categoriaRatio.nombre_categoria : 'N/A',
+    },
+    {
+      Header: 'PARÁMETRO',
+      accessor: row => row.parametroSector ? row.parametroSector.nombreRatio : 'N/A',
+    },
+    { 
+      Header: 'AÑO', 
+      accessor: 'anio_ratio' 
+    },
+    { 
+      Header: 'PERÍODO', 
+      accessor: 'periodo_ratio' 
+    }
   ];
 
-  const columnasSectores = [
-    { Header: 'ID', accessor: 'id' },
-    { Header: 'Categoria', accessor: 'categoria' },
-    { Header: 'Tipo', accessor: 'tipo' },
-    { Header: 'Parametro', accessor: 'parametro' },
-    { Header: 'Año', accessor: 'anio' },
-    { Header: 'Periodo', accessor: 'periodo' }
-  ];
+  // --- Manejadores de eventos del Modal ---
+  const handleNuevoRatio = () => {
+    setEditingRatio(null);
+    setIsModalOpen(true);
+  };
 
- const handleNuevoRatio = () => {
-    console.log("Se presionó el botón para crear un nuevo ratio.");
-    // Aquí puedes agregar la lógica para abrir un modal o navegar a una página de creación.
+  const handleCloseModal = () => {
+    setIsModalOpen(false);
+    setEditingRatio(null);
   };
 
   const handleEditar = (ratio) => {
-    console.log('Editando:', ratio);
+    setEditingRatio({
+      id_ratio: ratio.id_ratio,
+      empresa_id: ratio.empresa.empresaId, 
+      id_categoria_ratio: ratio.categoriaRatio.idCategoriaRatio, 
+      id_parametro_sector: ratio.parametroSector.idParametroSector,
+      anio_ratio: ratio.anio_ratio,
+      periodo_ratio: ratio.periodo_ratio,
+    });
+    setIsModalOpen(true);
   };
 
+  // =============================================================
+  // --- ✅ INICIO: LÓGICA PARA VER Y CALCULAR ---
+  // =============================================================
+  
+  /**
+   * Manejador para el botón "Ver".
+   * TODO: Implementar la lógica deseada (ej: abrir un modal de solo lectura).
+   */
   const handleVer = (ratio) => {
-    console.log('Viendo:', ratio);
+    console.log("Ver detalles del ratio:", ratio);
+    // Aquí podrías, por ejemplo, abrir otro modal con la información detallada del ratio.
+    Notifier.info(`Viendo detalles del ratio con ID: ${ratio.id_ratio}`);
   };
 
-  const handleEliminar = (ratio) => {
-    console.log('Eliminando:', ratio);
-  };
-
-  // 1. Crea la nueva función para manejar la acción de calcular
+  /**
+   * Manejador para el botón "Calcular".
+   * TODO: Implementar la lógica deseada (ej: navegar a una página de cálculo).
+   */
   const handleCalcular = (ratio) => {
-    console.log('Calculando ratio para:', ratio);
-    // Aquí puedes agregar la lógica para navegar a otra página, abrir un modal, etc.
+    console.log("Calcular ratio:", ratio);
+    // Aquí podrías, por ejemplo, navegar a una nueva ruta para realizar cálculos.
+    // history.push(`/sectores/calculo-ratio/${ratio.id_ratio}`);
+    Notifier.success(`Iniciando cálculo para el ratio con ID: ${ratio.id_ratio}`);
+  };
+
+  // =============================================================
+  // --- ✅ FIN: LÓGICA PARA VER Y CALCULAR ---
+  // =============================================================
+
+
+  const handleSave = async (formData, id) => {
+    const isEditing = !!id;
+    const payload = {
+      anio_ratio: parseInt(formData.anio_ratio, 10),
+      periodo_ratio: formData.periodo_ratio,
+      empresa_id: parseInt(formData.empresa_id, 10),
+      id_categoria_ratio: parseInt(formData.id_categoria_ratio, 10),
+      id_parametro_sector: parseInt(formData.id_parametro_sector, 10),
+    };
+
+    const loadingToastId = Notifier.loading(isEditing ? "Actualizando ratio..." : "Guardando nuevo ratio...");
+
+    try {
+      if (isEditing) {
+        await updateRatio(id, payload);
+      } else {
+        await createRatio(payload);
+      }
+      Notifier.dismiss(loadingToastId);
+      Notifier.success(`¡Ratio ${isEditing ? 'actualizado' : 'creado'} exitosamente!`);
+      
+      handleCloseModal();
+      fetchData();
+    } catch (error) {
+      Notifier.dismiss(loadingToastId);
+      Notifier.error(`Error al ${isEditing ? 'actualizar' : 'crear'} el ratio.`);
+      console.error("Error en handleSave:", error);
+    }
+  };
+
+  const handleEliminar = async (ratio) => {
+    const result = await Notifier.confirm({
+      title: `¿Estás seguro de eliminar el ratio?`,
+      text: `Se eliminará el registro del año ${ratio.anio_ratio} para la empresa ${ratio.nombreEmpresa}. Esta acción no se puede deshacer.`,
+    });
+
+    if (result.isConfirmed) {
+      const loadingToastId = Notifier.loading("Eliminando...");
+      try {
+        await deleteRatio(ratio.id_ratio);
+        Notifier.dismiss(loadingToastId);
+        Notifier.success("Ratio eliminado correctamente.");
+        fetchData();
+      } catch (error) {
+        Notifier.dismiss(loadingToastId);
+        Notifier.error("No se pudo eliminar el ratio. Inténtalo de nuevo.");
+        console.error("Error en handleEliminar:", error);
+      }
+    }
   };
 
   return (
@@ -49,19 +189,33 @@ export const Ratio = () => {
       <SubMenu links={sectoresSubMenuLinks} />
 
       <div style={{ marginTop: '2rem' }}>
-        <Tabla
-          titulo="Gestión de Ratio"
-          textoBotonNuevo="Nuevo Ratio"
-          columnas={columnasSectores}
-          datos={datosSectores}
-          enEditar={handleEditar}
-          enVer={handleVer}
-          enEliminar={handleEliminar}
-          // 2. Pasa la nueva función como prop a la Tabla
-          enCalcular={handleCalcular}
-          onNuevoClick={handleNuevoRatio}
-        />
+        {loading ? (
+          <p>Cargando ratios...</p>
+        ) : (
+          <Tabla
+            titulo="Gestión de Ratios"
+            textoBotonNuevo="Nuevo Ratio"
+            columnas={columnas}
+            datos={ratios}
+            onNuevoClick={handleNuevoRatio}
+            enEditar={handleEditar}
+            enEliminar={handleEliminar}
+            // --- ✅ SE PASAN LAS NUEVAS FUNCIONES COMO PROPS ---
+            enVer={handleVer}
+            enCalcular={handleCalcular}
+          />
+        )}
       </div>
+
+      <RatioFormModal
+        show={isModalOpen}
+        onClose={handleCloseModal}
+        onSave={handleSave}
+        initialData={editingRatio}
+        categorias={categorias}
+        parametros={parametros}
+        empresas={empresas}
+      />
     </div>
   );
 };
