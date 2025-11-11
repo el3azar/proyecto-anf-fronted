@@ -22,6 +22,8 @@ import { ParametroSector } from '../components/ratio/ParametroSector';
 import { Ratio } from '../components/ratio/Ratio';
 import { Proyecciones } from '../components/proyeccion/Proyecciones'; // Usamos el componente contenedor
 import HistorialVentas from '../components/proyeccion/HistorialVentas'; // Importamos el nuevo componente de historial
+import AnalisisHV from '../components/analisis/AnalisisHV';
+import DashboardAnalisis from '../components/analisis/DashboardAnalisis';
 
 export default function AppRouter() {
   return (
@@ -57,6 +59,9 @@ export default function AppRouter() {
             <Route path="/empresas" element={<Empresas />} />
             <Route path="/usuarios" element={<Usuarios />} />
             <Route path="/catalogo-cuentas" element={<CatalogoCuentas />} />
+
+            <Route path="/analisis" element={<DashboardAnalisis/>} />
+            <Route path="/analisis/comparativo" element={<AnalisisHV />} />
 
 
             <Route path="/proyecciones/cargar" element={<Proyecciones />} />

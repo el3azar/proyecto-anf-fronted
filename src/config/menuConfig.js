@@ -1,20 +1,18 @@
 // 1. Importa los nuevos íconos al principio del archivo
-import { House, Building, PeopleFill, Diagram3, FileEarmarkText, JournalCheck, GraphUpArrow } from 'react-bootstrap-icons';
+import { House, Building, PeopleFill, Diagram3, BarChart, FileEarmarkText, JournalCheck, GraphUpArrow } from 'react-bootstrap-icons';
 
 // Solo necesitamos una lista de enlaces, ya que no hay roles
 export const mainLinks = [
   { idOp: 0, to: "/dashboard", label: "Dashboard", icon: House },
   { idOp: 1, to: "/empresas", label: "Empresas", icon: Building },
-  { idOp: 2, to: "/ratios", label: "Ratios", icon: Diagram3 },
-  { idOp: 3, to: "/usuarios", label: "Usuarios", icon: PeopleFill },
-
-  // --- INICIO DE LAS NUEVAS OPCIONES ---
-  { idOp: 4, to: "/catalogo-cuentas", label: "Catálogo de Cuentas", icon: JournalCheck },
-  { idOp: 5, to: "/proyecciones", label: "Proyecciones", icon: GraphUpArrow },
-  // --- FIN DE LAS NUEVAS OPCIONES ---
-
-  { idOp: 6, to: "/estados-financieros", label: "Estados Financieros", icon: FileEarmarkText },
+  { idOp: 2, to: "/analisis", label: "Análisis y Reportes", icon: BarChart },
+  { idOp: 3, to: "/ratios", label: "Ratios", icon: Diagram3 },
+  { idOp: 4, to: "/usuarios", label: "Usuarios", icon: PeopleFill },
+  { idOp: 5, to: "/catalogo-cuentas", label: "Catálogo de Cuentas", icon: JournalCheck },
+  { idOp: 6, to: "/proyecciones", label: "Proyecciones", icon: GraphUpArrow },
+  { idOp: 7, to: "/estados-financieros", label: "Estados Financieros", icon: FileEarmarkText },
 ];
+
 
 /**
  * Configuraciones centralizadas para los sub-menús de cada módulo.
