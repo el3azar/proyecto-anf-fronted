@@ -5,14 +5,23 @@ import { List, BoxArrowRight } from 'react-bootstrap-icons';
 import { useAuth } from "../context/AuthContext";
 import { mainLinks } from '../config/menuConfig'; // Importamos la nueva config
 
+// obtener los accesos del usuario desde el contexto de autenticación
+
 const SideBar = ({ sidebarOpen, toggleSidebar }) => {
   const { pathname } = useLocation();
-  const { logout } = useAuth();
+  const { logout, user } = useAuth();
   const navigate = useNavigate();
+
+  if (!user) return null; // o un loader
+
+  // Filtrar las opciones visibles según los accesos del usuario
+  const visibleLinks = mainLinks.filter(link =>
+    user.accesos.includes(link.idOp)
+  );
 
   const handleLogout = () => {
     logout();
-    navigate("/"); // Redirigimos al login al cerrar sesión
+    navigate("/");
   };
 
   return (
@@ -28,7 +37,7 @@ const SideBar = ({ sidebarOpen, toggleSidebar }) => {
 
       <nav className={styles.sidebarNav}>
         <ul className="nav nav-pills flex-column mb-auto">
-          {mainLinks.map(({ to, label, icon: Icon }, i) => (
+          {visibleLinks.map(({ to, label, icon: Icon }, i) => (
             <li key={i} className="nav-item">
               <Link to={to} className={`nav-link ${styles.menuLink} ${pathname.startsWith(to) ? styles.active : "text-white"}`} title={label}>
                 <Icon className={styles.menuIcon} size={20} />

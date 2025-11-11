@@ -3,17 +3,17 @@ import { House, Building, PeopleFill, Diagram3, FileEarmarkText, JournalCheck, G
 
 // Solo necesitamos una lista de enlaces, ya que no hay roles
 export const mainLinks = [
-  { to: "/dashboard", label: "Dashboard", icon: House },
-  { to: "/empresas", label: "Empresas", icon: Building },
-  { to: "/ratios", label: "Ratios", icon: Diagram3 },
-  { to: "/usuarios", label: "Usuarios", icon: PeopleFill },
-  
+  { idOp: 0, to: "/dashboard", label: "Dashboard", icon: House },
+  { idOp: 1, to: "/empresas", label: "Empresas", icon: Building },
+  { idOp: 2, to: "/ratios", label: "Ratios", icon: Diagram3 },
+  { idOp: 3, to: "/usuarios", label: "Usuarios", icon: PeopleFill },
+
   // --- INICIO DE LAS NUEVAS OPCIONES ---
-  { to: "/catalogo-cuentas", label: "Catálogo de Cuentas", icon: JournalCheck },
-  { to: "/proyecciones", label: "Proyecciones", icon: GraphUpArrow },
+  { idOp: 4, to: "/catalogo-cuentas", label: "Catálogo de Cuentas", icon: JournalCheck },
+  { idOp: 5, to: "/proyecciones", label: "Proyecciones", icon: GraphUpArrow },
   // --- FIN DE LAS NUEVAS OPCIONES ---
-  
-  { to: "/estados-financieros", label: "Estados Financieros", icon: FileEarmarkText },
+
+  { idOp: 6, to: "/estados-financieros", label: "Estados Financieros", icon: FileEarmarkText },
 ];
 
 /**
