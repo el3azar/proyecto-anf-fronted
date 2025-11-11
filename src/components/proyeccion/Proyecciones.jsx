@@ -8,6 +8,9 @@ import tabStyles from '../../styles/proyeccion/Proyecciones.module.css';
 import buttonStyles from '../../styles/shared/Button.module.css';
 import { CargaMasivaVentas } from './CargaMasivaVentas';
 import { CargaManualVentas } from './CargaManualVentas';
+import { getProyeccionVentas } from '../../services/proyeccion/ventaHistoricaService';
+import { Notifier } from '../../utils/Notifier';
+
 
 export const Proyecciones = () => {
   const [empresas, setEmpresas] = useState([]);
@@ -29,20 +32,25 @@ export const Proyecciones = () => {
     cargarEmpresas();
   }, []);
 
-  const handleGenerarProyeccion = () => {
-    if (!empresaSeleccionada || !metodo) {
-      alert("Por favor seleccione una empresa y un método de proyección.");
-      return;
-    }
+  const [proyecciones, setProyecciones] = useState([]);
 
-    console.log("Generando proyección con los siguientes datos:", {
-      empresaSeleccionada,
-      metodo,
-      ventas
-    });
+const handleGenerarProyeccion = async () => {
+  if (!empresaSeleccionada || !metodo) {
+    Notifier.warning("Por favor seleccione una empresa y un método de proyección.");
+    return;
+  }
 
-    // Aquí iría la llamada al backend para generar la proyección
-  };
+  const toastId = Notifier.loading("Generando proyección...");
+  try {
+    const response = await getProyeccionVentas(empresaSeleccionada, 12, metodo.toUpperCase().replace("-", "_"));
+    setProyecciones(response.data);
+    Notifier.dismiss(toastId);
+    Notifier.success("Proyección generada correctamente.");
+  } catch (error) {
+    Notifier.dismiss(toastId);
+    Notifier.error(error.response?.data?.message || "Error al generar la proyección.");
+  }
+};
 
   return (
     <div className={viewStyles.viewContainer}>
@@ -125,6 +133,27 @@ export const Proyecciones = () => {
         >
           Generar Proyección
         </button>
+        {proyecciones.length > 0 && (
+  <div className="mt-4 table-responsive">
+    <h5>Resultados de la Proyección</h5>
+    <table className={viewStyles.table}>
+      <thead>
+        <tr>
+          <th>Fecha proyectada</th>
+          <th>Monto proyectado</th>
+        </tr>
+      </thead>
+      <tbody>
+        {proyecciones.map((p, i) => (
+          <tr key={i}>
+            <td>{p.fechaProyectada || p.fecha}</td>
+            <td>{(p.montoProyectado ?? p.monto)?.toFixed(2)}</td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
+  </div>
+)}
       </div>
     </div>
   );

@@ -21,10 +21,26 @@ export const CargaManualVentas = () => {
 
     const onSubmit = async (data) => {
         setIsLoading(true);
+        const fechas = data.ventas.map(v => v.fechaVenta);
+        const duplicadas = fechas.filter((f, i) => fechas.indexOf(f) !== i);
+        if (duplicadas.length > 0) {
+            Notifier.error("No puedes repetir meses en las ventas.");
+            setIsLoading(false);
+            return;
+        }
         const payload = {
-            ...data,
-            empresaId: parseInt(data.empresaId),
-            ventas: data.ventas.map(v => ({...v, montoVenta: parseFloat(v.montoVenta)}))
+        empresaId: parseInt(data.empresaId),
+        ventas: data.ventas.map(v => {
+            // Aseguramos formato YYYY-MM-DD (último día del mes)
+            const [year, month] = v.fechaVenta.split("-");
+            const fechaVenta = new Date(year, month, 0); // Día 0 del mes siguiente = último día del mes actual
+
+            return {
+                fechaVenta: fechaVenta.toISOString().split("T")[0], // "YYYY-MM-DD"
+                montoVenta: parseFloat(v.montoVenta),
+                observacion: v.observacion || `Ventas ${fechaVenta.toLocaleString('es-ES', { month: 'long', year: 'numeric' })}`,
+            };
+        }),
         };
         const toastId = Notifier.loading("Guardando registros...");
         try {
