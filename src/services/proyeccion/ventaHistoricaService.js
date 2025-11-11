@@ -4,11 +4,13 @@ import axios from 'axios';
 const API_URL = 'http://localhost:8080/api/v1/ventas-historicas';
 
 /**
- * Obtiene todos los registros de ventas históricas para una empresa.
- * GET /empresa/{empresaId}
+ * Obtiene la proyección de ventas según el método seleccionado.
+ * GET /empresa/{empresaId}/proyeccion/{meses}?metodo={metodo}
  */
-export const getVentasPorEmpresa = (empresaId) => {
-  return axios.get(`${API_URL}/empresa/${empresaId}`);
+export const getProyeccionVentas = (empresaId, meses, metodo) => {
+  return axios.get(`${API_URL}/empresa/${empresaId}/proyeccion/${meses}`, {
+    params: { metodo },
+  });
 };
 
 /**

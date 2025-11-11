@@ -60,7 +60,7 @@ export default function Login() {
                         <label htmlFor="password">Contraseña</label>
                         <input
                             type="password"
-                            id="password"
+                            id="contrasena"
                             {...register('password', { required: "La contraseña es obligatoria" })}
                             className={`w-100 ${errors.password ? styles.inputError : ''}`}
                         />

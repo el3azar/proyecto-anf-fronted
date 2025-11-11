@@ -1,40 +1,40 @@
-import React, { createContext, useContext, useState } from "react";
+// src/context/AuthContext.jsx
+import React, { createContext, useContext, useState, useEffect } from "react";
+import { authService } from "../services/auth/authService";
 
 const TOKEN_KEY = "analisis_token";
-
 const AuthContext = createContext();
 
 export function AuthProvider({ children }) {
-  // Inicializamos el estado de autenticación leyendo de sessionStorage
-  const [isAuthenticated, setIsAuthenticated] = useState(!!sessionStorage.getItem(TOKEN_KEY));
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [user, setUser] = useState(null);
 
-  // LOGIN SIMULADO: Esta función será reemplazada por la llamada real al backend
-  const login = async (userName, password) => {
-    console.log(`Simulando login para el usuario: ${userName}`);
-    // Simulación: Creamos un token y usuario falsos
-    const fakeToken = 'fake-jwt-token-for-dev';
-    const fakeUser = { userName: userName, rol: 'ANALISTA' }; // Rol único
+  useEffect(() => {
+    const token = sessionStorage.getItem(TOKEN_KEY);
+    if (token) setIsAuthenticated(true);
+  }, []);
 
-    // Guardamos en sessionStorage para persistir la sesión
-    sessionStorage.setItem(TOKEN_KEY, fakeToken);
-    
-    // Actualizamos el estado de la aplicación
-    setUser(fakeUser);
-    setIsAuthenticated(true);
-  };
+const login = async (userName, contrasena) => {
+  const data = await authService.login(userName, contrasena);
+  sessionStorage.setItem(TOKEN_KEY, data.token);
+  setUser({ 
+    userName: data.userName, 
+    rol: data.rol, 
+    id: data.id,
+    accesos: data.accesos  // guarda los accesos
+  });
+  setIsAuthenticated(true);
+  return data;
+};
 
   const logout = () => {
-    // Limpiamos el estado y el sessionStorage
+    sessionStorage.removeItem(TOKEN_KEY);
     setUser(null);
     setIsAuthenticated(false);
-    sessionStorage.removeItem(TOKEN_KEY);
   };
-  
-  const contextValue = { isAuthenticated, user, login, logout };
 
   return (
-    <AuthContext.Provider value={contextValue}>
+    <AuthContext.Provider value={{ isAuthenticated, user, login, logout }}>
       {children}
     </AuthContext.Provider>
   );
