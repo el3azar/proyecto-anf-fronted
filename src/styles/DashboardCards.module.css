@@ -53,3 +53,17 @@
 .dashboardCard:hover .cardLabel {
   color: var(--color-darkest); /* Color del texto al hacer hover */
 }
+
+.cardDescription {
+  font-size: 0.9rem;
+  font-weight: 300;
+  color: #6c757d;
+  margin-top: 10px;
+  margin-bottom: 0;
+  padding: 0 15px;
+  line-height: 1.4;
+}
+
+.dashboardCard:hover .cardDescription {
+  color: #343a40;
+}
