@@ -63,20 +63,133 @@ export const deleteRatio = async (id) => {
 
 
 };
+// --- Funciones de Cálculo ---
 
-  /**
- * Llama al endpoint del backend para calcular los campos derivados de un ratio.
+/**
+ * Llama al endpoint del backend para calcular un ratio de Liquidez.
  * @param {number} id - El ID del ratio a calcular.
- * @returns {Promise<object>} - El objeto del ratio con los datos actualizados.
  */
 export const calculateLiquidezRatio = async (id) => {
   try {
-    // Usamos axios.put para llamar al endpoint PUT que creaste
     const response = await axios.put(`${API_URL}/${id}/calcular-liquidez`);
-    return response.data; // El backend devuelve el ratio actualizado
+    return response.data;
   } catch (error) {
-    console.error(`Error al calcular el ratio con ID ${id}:`, error);
-    // Es importante relanzar el error para que el componente que llama pueda manejarlo
+    console.error(`Error al calcular el ratio de liquidez con ID ${id}:`, error);
+    throw error;
+  }
+};
+
+// ✅ AÑADE LAS NUEVAS FUNCIONES DE CÁLCULO AQUÍ
+
+/**
+ * Llama al endpoint para calcular un ratio de Capital de Trabajo.
+ * @param {number} id - El ID del ratio a calcular.
+ */
+export const calculateCapitalTrabajoRatio = async (id) => {
+  try {
+    const response = await axios.put(`${API_URL}/${id}/calcular-capital-trabajo`);
+    return response.data;
+  } catch (error) {
+    console.error(`Error al calcular el ratio de capital de trabajo con ID ${id}:`, error);
+    throw error;
+  }
+};
+
+/**
+ * Llama al endpoint para calcular un ratio de Razón de Efectivo.
+ * @param {number} id - El ID del ratio a calcular.
+ */
+export const calculateEfectivoRatio = async (id) => {
+  try {
+    const response = await axios.put(`${API_URL}/${id}/calcular-efectivo`);
+    return response.data;
+  } catch (error) {
+    console.error(`Error al calcular el ratio de efectivo con ID ${id}:`, error);
+    throw error;
+  }
+};
+
+/**
+ * Llama al endpoint para calcular un ratio de Rotación de Cuentas por Cobrar.
+ * @param {number} id - El ID del ratio a calcular.
+ */
+export const calculateRotacionCuentasPorCobrarRatio = async (id) => {
+  try {
+    const response = await axios.put(`${API_URL}/${id}/calcular-rotacion-cuentas-cobrar`);
+    return response.data;
+  } catch (error) {
+    console.error(`Error al calcular el ratio de rotación de cuentas por cobrar con ID ${id}:`, error);
+    throw error;
+  }
+};
+
+
+/**
+ * Llama al endpoint para calcular un ratio de Período Medio de Cobranza.
+ * @param {number} id - El ID del ratio a calcular.
+ */
+export const calculatePeriodoCobranzaRatio = async (id) => {
+  try {
+    const response = await axios.put(`${API_URL}/${id}/calcular-periodo-cobranza`);
+    return response.data;
+  } catch (error) {
+    console.error(`Error al calcular el período medio de cobranza con ID ${id}:`, error);
+    throw error;
+  }
+};
+
+/**
+ * Llama al endpoint para calcular la Rotación de Activos Totales.
+ * @param {number} id - El ID del ratio a calcular.
+ */
+export const calculateRotacionActivosTotalesRatio = async (id) => {
+  try {
+    const response = await axios.put(`${API_URL}/${id}/calcular-rotacion-activos-totales`);
+    return response.data;
+  } catch (error) {
+    console.error(`Error al calcular la rotación de activos totales con ID ${id}:`, error);
+    throw error;
+  }
+};
+
+/**
+ * Llama al endpoint para calcular la Rotación de Activos Fijos.
+ * @param {number} id - El ID del ratio a calcular.
+ */
+export const calculateRotacionActivosFijosRatio = async (id) => {
+  try {
+    const response = await axios.put(`${API_URL}/${id}/calcular-rotacion-activos-fijos`);
+    return response.data;
+  } catch (error) {
+    console.error(`Error al calcular la rotación de activos fijos con ID ${id}:`, error);
+    throw error;
+  }
+};
+
+/**
+ * Llama al endpoint para calcular el Margen Bruto.
+ * @param {number} id - El ID del ratio a calcular.
+ */
+export const calculateMargenBrutoRatio = async (id) => {
+  try {
+    const response = await axios.put(`${API_URL}/${id}/calcular-margen-bruto`);
+    return response.data;
+  } catch (error) {
+    console.error(`Error al calcular el margen bruto con ID ${id}:`, error);
+    throw error;
+  }
+};
+
+/**
+ * Llama al endpoint para calcular el Margen Operativo.
+ * @param {number} id - El ID del ratio a calcular.
+ */
+export const calculateMargenOperativoRatio = async (id) => {
+  try {
+    const response = await axios.put(`${API_URL}/${id}/calcular-margen-operativo`);
+    return response.data;
+  } catch (error) {
+    console.error(`Error al calcular el margen operativo con ID ${id}:`, error);
     throw error;
   }
 };
