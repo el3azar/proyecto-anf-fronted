@@ -5,7 +5,7 @@ import Tabla from '../shared/Tabla';
 import { Notifier } from '../../utils/Notifier';
 
 // --- Servicios a utilizar (con la nueva función importada) ---
-import { getRatios, createRatio, updateRatio, deleteRatio, calculateLiquidezRatio } from '../../services/ratio/ratioService';
+import { getRatios, createRatio, updateRatio, deleteRatio, calculateLiquidezRatio, calculateCapitalTrabajoRatio, calculateEfectivoRatio, calculateRotacionCuentasPorCobrarRatio, calculatePeriodoCobranzaRatio, calculateRotacionActivosTotalesRatio, calculateRotacionActivosFijosRatio, calculateMargenBrutoRatio, calculateMargenOperativoRatio } from '../../services/ratio/ratioService';
 
 // --- Componentes y otros servicios ---
 import { RatioFormModal } from './RatioFormModal';
@@ -137,27 +137,51 @@ export const Ratio = () => {
 
   // --- Lógica de Calcular ---
   const handleCalcular = async (ratio) => {
-    const loadingToastId = Notifier.loading(`Calculando ratio ID: ${ratio.id_ratio}...`);
+    const categoriaNombre = ratio.categoriaRatio?.nombre_categoria;
+    const ratioId = ratio.id_ratio;
+
+    if (!categoriaNombre) {
+      Notifier.error("La categoría del ratio no está definida. No se puede calcular.");
+      return;
+    }
+
+    // El "mapa" que conecta el nombre de la categoría con la función de servicio.
+    // ¡Asegúrate de que los nombres coincidan con los de tu base de datos!
+    const calculoPorCategoria = {
+      'Razón de circulante o liquidez corriente': calculateLiquidezRatio,
+      'Razón de capital de trabajo': calculateCapitalTrabajoRatio,
+      'Razón de efectivo': calculateEfectivoRatio,
+      'Razón de rotación de cuentas por cobrar': calculateRotacionCuentasPorCobrarRatio,
+      // --- NUEVOS RATIOS AÑADIDOS AL MAPA ---
+      'Período Medio de Cobranza': calculatePeriodoCobranzaRatio,
+      'Índice de rotación de activos totales': calculateRotacionActivosTotalesRatio,
+      'Índice de rotación de activos fijos': calculateRotacionActivosFijosRatio,
+      'Índice de margen bruto': calculateMargenBrutoRatio,
+      'Índice de margen operativo': calculateMargenOperativoRatio,
+    };
+
+    const funcionDeCalculo = calculoPorCategoria[categoriaNombre];
+
+    if (!funcionDeCalculo) {
+      Notifier.warning(`La categoría "${categoriaNombre}" aún no tiene una función de cálculo implementada.`);
+      return;
+    }
+
+    const loadingToastId = Notifier.loading(`Calculando ratio ID: ${ratioId} (${categoriaNombre})...`);
 
     try {
-      // 1. Llama al endpoint del backend
-      await calculateLiquidezRatio(ratio.id_ratio);
-      
-      // 2. Notifica al usuario que la operación fue exitosa
+      await funcionDeCalculo(ratioId);
       Notifier.dismiss(loadingToastId);
-      Notifier.success(`¡Ratio ID: ${ratio.id_ratio} calculado exitosamente!`);
-      
-      // 3. Refresca los datos para mantener la consistencia
+      Notifier.success(`¡Ratio ID: ${ratioId} calculado exitosamente!`);
       fetchData(filtroEmpresa);
-
     } catch (error) {
-      // 4. Si hay un error, notifica al usuario con un mensaje claro
       Notifier.dismiss(loadingToastId);
-      const errorMessage = error.response?.data?.message || "No se pudo calcular el ratio.";
+      const errorMessage = error.response?.data?.message || `No se pudo calcular el ratio de ${categoriaNombre}.`;
       Notifier.error(errorMessage);
-      console.error("Error en handleCalcular:", error);
+      console.error(`Error en handleCalcular para la categoría ${categoriaNombre}:`, error);
     }
   };
+
 
   // --- Lógica de Guardar ---
   const handleSave = async (formData, id) => {
