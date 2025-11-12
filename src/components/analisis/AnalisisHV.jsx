@@ -1,21 +1,29 @@
 import React, { useState, useEffect } from "react";
-import {
-  Box,
-  Typography,
-  Select,
-  MenuItem,
-  FormControl,
-  InputLabel,
-  Button,
-  TableContainer,
-  Paper,
-  Table,
-  TableHead,
-  TableRow,
-  TableCell,
-  TableBody,
-} from "@mui/material";
 import axios from "axios";
+
+
+import viewStyles from "../../styles/shared/View.module.css";
+import buttonStyles from "../../styles/shared/Button.module.css";
+import styles from "../../styles/analisis/AnalisisHV.module.css"; 
+
+
+const formatNumber = (num) => {
+
+  if (typeof num !== "number") return num;
+
+  return num.toLocaleString("es-SV", {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  });
+};
+
+// Función para formatear porcentajes
+const formatPercent = (num) => {
+  if (typeof num !== "number") return "N/A";
+  // .toFixed(2) es correcto para porcentajes
+  return `${num.toFixed(2)}%`;
+};
+// ------------------------------------------
 
 const AnalisisHV = () => {
   const [empresas, setEmpresas] = useState([]);
@@ -24,7 +32,7 @@ const AnalisisHV = () => {
   const [anio2, setAnio2] = useState("");
   const [aniosDisponibles, setAniosDisponibles] = useState([]);
   const [reporte, setReporte] = useState(null);
-  const [tipoAnalisis, setTipoAnalisis] = useState("horizontal"); // 👈 Nuevo
+  const [tipoAnalisis, setTipoAnalisis] = useState("horizontal");
 
   // Cargar empresas
   useEffect(() => {
@@ -36,149 +44,201 @@ const AnalisisHV = () => {
 
   // Cargar años disponibles según empresa
   useEffect(() => {
-    if (empresaSeleccionada) {
-      axios
-        .get(`http://localhost:8080/api/v1/estados-financieros/anios/${empresaSeleccionada}`)
-        .then((res) => setAniosDisponibles(res.data))
-        .catch((err) => console.error("Error al cargar años:", err));
+    // Resetea los años y el reporte si no hay empresa seleccionada
+    if (!empresaSeleccionada) {
+      setAniosDisponibles([]);
+      setAnio1("");
+      setAnio2("");
+      setReporte(null);
+      return;
     }
+
+    axios
+      .get(`http://localhost:8080/api/v1/estados-financieros/anios/${empresaSeleccionada}`)
+      .then((res) => {
+          setAniosDisponibles(res.data);
+          // Resetea los años y el reporte si la empresa cambia
+          setAnio1("");
+          setAnio2("");
+          setReporte(null);
+      })
+      .catch((err) => {
+        console.error("Error al cargar años:", err);
+        setAniosDisponibles([]);
+      });
   }, [empresaSeleccionada]);
 
   const handleGenerarReporte = () => {
+    if (!empresaSeleccionada || !anio1 || !anio2) return;
+
     axios
-      .get("http://localhost:8080/api/analisis/reporte-interno", {
+      .get("http://localhost:8080/api/v1/analisis/reporte-interno?", {
         params: { empresaId: empresaSeleccionada, anio1, anio2 },
       })
       .then((res) => {
         setReporte(res.data);
         console.log("Reporte recibido:", res.data);
       })
-      .catch((err) => console.error("Error al generar reporte:", err));
+      .catch((err) => {
+        console.error("Error al generar reporte:", err);
+        setReporte(null); // Limpia el reporte anterior si hay un error
+      });
   };
-
+  
   const datos = tipoAnalisis === "horizontal"
     ? reporte?.analisisHorizontal || []
     : reporte?.analisisVertical || [];
-
+    
+  // 3. Usa la estructura y clases de tus otros componentes
   return (
-    <Box sx={{ p: 4, display: "flex", flexDirection: "column", gap: 3 }}>
-      <Typography variant="h5">Análisis Comparativo Interno</Typography>
+    <div className={viewStyles.viewContainer}>
+      {/* Encabezado de la Vista */}
+      <div className={viewStyles.viewHeader}>
+        <h2 className={viewStyles.viewTitle}>Análisis Comparativo Interno</h2>
+      </div>
 
       {/* Selectores */}
-      <Box sx={{ display: "flex", gap: 2, flexWrap: "wrap" }}>
-        <FormControl sx={{ minWidth: 180 }}>
-          <InputLabel>Empresa</InputLabel>
-          <Select
+      <div className={styles.filterBar}>
+        <div className={styles.formControl}>
+          <label htmlFor="empresa">Empresa</label>
+          <select
+            id="empresa"
             value={empresaSeleccionada}
-            label="Empresa"
             onChange={(e) => setEmpresaSeleccionada(e.target.value)}
           >
+            <option value="">Seleccione una empresa</option>
             {empresas.map((e) => (
-              <MenuItem key={e.empresaId} value={e.empresaId}>
+              <option key={e.empresaId} value={e.empresaId}>
                 {e.nombreEmpresa}
-              </MenuItem>
+              </option>
             ))}
-          </Select>
-        </FormControl>
+          </select>
+        </div>
 
-        <FormControl sx={{ minWidth: 150 }}>
-          <InputLabel>Año Base</InputLabel>
-          <Select value={anio1} label="Año Base" onChange={(e) => setAnio1(e.target.value)}>
+        <div className={styles.formControl}>
+          <label htmlFor="anio1">Año Base</label>
+          <select
+            id="anio1"
+            value={anio1}
+            onChange={(e) => setAnio1(e.target.value)}
+            disabled={!empresaSeleccionada || aniosDisponibles.length === 0}
+          >
+            <option value="">Seleccione un año</option>
             {aniosDisponibles.map((anio) => (
-              <MenuItem key={anio} value={anio}>
+              <option key={anio} value={anio}>
                 {anio}
-              </MenuItem>
+              </option>
             ))}
-          </Select>
-        </FormControl>
+          </select>
+        </div>
 
-        <FormControl sx={{ minWidth: 150 }}>
-          <InputLabel>Año Comparación</InputLabel>
-          <Select value={anio2} label="Año Comparación" onChange={(e) => setAnio2(e.target.value)}>
+        <div className={styles.formControl}>
+          <label htmlFor="anio2">Año Comparación</label>
+          <select
+            id="anio2"
+            value={anio2}
+            onChange={(e) => setAnio2(e.target.value)}
+            disabled={!empresaSeleccionada || aniosDisponibles.length === 0}
+          >
+            <option value="">Seleccione un año</option>
             {aniosDisponibles.map((anio) => (
-              <MenuItem key={anio} value={anio}>
+              <option key={anio} value={anio}>
                 {anio}
-              </MenuItem>
+              </option>
             ))}
-          </Select>
-        </FormControl>
+          </select>
+        </div>
 
-        <Button
-          variant="contained"
+        <button
+          className={buttonStyles.btnPrimary}
           onClick={handleGenerarReporte}
           disabled={!empresaSeleccionada || !anio1 || !anio2}
         >
           Generar Reporte
-        </Button>
-      </Box>
+        </button>
+      </div>
 
       {/* Botones de vista */}
       {reporte && (
-        <Box sx={{ display: "flex", gap: 2, mt: 2 }}>
-          <Button
-            variant={tipoAnalisis === "horizontal" ? "contained" : "outlined"}
+        <div className={styles.toggleBar}>
+          <button
+            className={`${styles.toggleButton} ${
+              tipoAnalisis === "horizontal" ? styles.toggleButtonActive : ""
+            }`}
             onClick={() => setTipoAnalisis("horizontal")}
           >
             Análisis Horizontal
-          </Button>
-          <Button
-            variant={tipoAnalisis === "vertical" ? "contained" : "outlined"}
+          </button>
+          <button
+            className={`${styles.toggleButton} ${
+              tipoAnalisis === "vertical" ? styles.toggleButtonActive : ""
+            }`}
             onClick={() => setTipoAnalisis("vertical")}
           >
             Análisis Vertical
-          </Button>
-        </Box>
+          </button>
+        </div>
       )}
 
       {/* Tabla de resultados */}
       {reporte && (
-        <TableContainer component={Paper} sx={{ mt: 3 }}>
-          <Table>
-            <TableHead>
-              <TableRow>
-                <TableCell>Código</TableCell>
-                <TableCell>Cuenta</TableCell>
+     
+        <div className="table-responsive"> 
+          <table className={viewStyles.table}>
+            <thead>
+              <tr>
+                <th>Código</th>
+                <th>Cuenta</th>
                 {tipoAnalisis === "horizontal" ? (
                   <>
-                    <TableCell>Saldo {anio1}</TableCell>
-                    <TableCell>Saldo {anio2}</TableCell>
-                    <TableCell>Variación Absoluta</TableCell>
-                    <TableCell>Variación Relativa (%)</TableCell>
+                    <th style={{textAlign: 'right'}}>Saldo {anio1}</th>
+                    <th style={{textAlign: 'right'}}>Saldo {anio2}</th>
+                    <th style={{textAlign: 'right'}}>Variación Absoluta</th>
+                    <th style={{textAlign: 'right'}}>Variación Relativa (%)</th>
                   </>
                 ) : (
                   <>
-                    <TableCell>% Vertical {anio1}</TableCell>
-                    <TableCell>% Vertical {anio2}</TableCell>
+                    <th style={{textAlign: 'right'}}>% Vertical {anio1}</th>
+                    <th style={{textAlign: 'right'}}>% Vertical {anio2}</th>
                   </>
                 )}
-              </TableRow>
-            </TableHead>
-
-            <TableBody>
-              {datos.map((linea, i) => (
-                <TableRow key={i}>
-                  <TableCell>{linea.codigoCuenta}</TableCell>
-                  <TableCell>{linea.nombreCuenta}</TableCell>
-                  {tipoAnalisis === "horizontal" ? (
-                    <>
-                      <TableCell>{linea.saldoAnio1}</TableCell>
-                      <TableCell>{linea.saldoAnio2}</TableCell>
-                      <TableCell>{linea.variacionAbsoluta}</TableCell>
-                      <TableCell>{linea.variacionRelativa?.toFixed(2)}%</TableCell>
-                    </>
-                  ) : (
-                    <>
-                      <TableCell>{linea.porcentajeVerticalAnio1?.toFixed(2)}%</TableCell>
-                      <TableCell>{linea.porcentajeVerticalAnio2?.toFixed(2)}%</TableCell>
-                    </>
-                  )}
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </TableContainer>
+              </tr>
+            </thead>
+            <tbody>
+              {datos.length > 0 ? (
+                datos.map((linea, i) => (
+                  <tr key={i}>
+                    <td>{linea.codigoCuenta}</td>
+                    <td>{linea.nombreCuenta}</td>
+                    
+                    {/* 5. Aplica el formato a TODOS los números */}
+                    {tipoAnalisis === "horizontal" ? (
+                      <>
+                        <td style={{textAlign: 'right'}}>{formatNumber(linea.saldoAnio1)}</td>
+                        <td style={{textAlign: 'right'}}>{formatNumber(linea.saldoAnio2)}</td>
+                        <td style={{textAlign: 'right'}}>{formatNumber(linea.variacionAbsoluta)}</td>
+                        <td style={{textAlign: 'right'}}>{formatPercent(linea.variacionRelativa)}</td>
+                      </>
+                    ) : (
+                      <>
+                        <td style={{textAlign: 'right'}}>{formatPercent(linea.porcentajeVerticalAnio1)}</td>
+                        <td style={{textAlign: 'right'}}>{formatPercent(linea.porcentajeVerticalAnio2)}</td>
+                      </>
+                    )}
+                  </tr>
+                ))
+              ) : (
+                <tr>
+                  <td colSpan={tipoAnalisis === 'horizontal' ? 6 : 4} style={{ textAlign: 'center' }}>
+                    No hay datos para mostrar.
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
       )}
-    </Box>
+    </div>
   );
 };
 
