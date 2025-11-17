@@ -9,7 +9,6 @@ import { getRatios, createRatio, updateRatio, deleteRatio, calculateLiquidezRati
 
 // --- Componentes y otros servicios ---
 import { RatioFormModal } from './RatioFormModal';
-// ✅ 1. IMPORTA EL NUEVO MODAL DE DETALLES
 import { RatioDetailsModal } from './RatioDetailsModal'; 
 import { getCategoriasRatio } from '../../services/ratio/CategoriaRatio';
 import { getParametros } from '../../services/ratio/parametroSector';
@@ -30,7 +29,7 @@ export const Ratio = () => {
   const [isModalOpen, setIsModalOpen] = useState(false); // Para el formulario
   const [editingRatio, setEditingRatio] = useState(null);
 
-  // ✅ 2. AÑADE NUEVOS ESTADOS PARA EL MODAL DE DETALLES
+
   const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false);
   const [selectedRatioDetails, setSelectedRatioDetails] = useState(null);
 
@@ -129,7 +128,7 @@ export const Ratio = () => {
     setIsModalOpen(true);
   };
   
-  // ✅ 3. LÓGICA DE VER ACTUALIZADA PARA ABRIR EL MODAL
+
   const handleVer = (ratio) => {
     setSelectedRatioDetails(ratio); // Guarda los datos del ratio a mostrar
     setIsDetailsModalOpen(true);    // Abre el modal de detalles
@@ -241,14 +240,13 @@ export const Ratio = () => {
       <SubMenu links={sectoresSubMenuLinks} />
 
       <div style={{ marginTop: '2rem' }}>
+         {/* --- INICIO DEL CAMBIO --- */}
         <div style={{ marginBottom: '1.5rem', maxWidth: '400px' }}>
           <label htmlFor="filtro-empresa" style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 'bold' }}>
-            Filtrar por Nombre de Empresa
+            Filtrar por Empresa
           </label>
-          <input
+          <select
             id="filtro-empresa"
-            type="text"
-            placeholder="Ej: DIANA"
             value={filtroEmpresa}
             onChange={(e) => setFiltroEmpresa(e.target.value)}
             style={{ 
@@ -256,10 +254,19 @@ export const Ratio = () => {
               padding: '8px 12px', 
               fontSize: '1rem', 
               borderRadius: '4px', 
-              border: '1px solid #ccc' 
+              border: '1px solid #ccc',
+              backgroundColor: 'white' // Estilo adicional para mejor apariencia
             }}
-          />
+          >
+            <option value="">-- Todas las empresas --</option>
+            {empresas.map(empresa => (
+              <option key={empresa.empresaId} value={empresa.nombreEmpresa}>
+                {empresa.nombreEmpresa}
+              </option>
+            ))}
+          </select>
         </div>
+        {/* --- FIN DEL CAMBIO --- */}
 
         {loading ? (
           <p>Cargando ratios...</p>
@@ -288,7 +295,7 @@ export const Ratio = () => {
         empresas={empresas}
       />
 
-      {/* ✅ 4. RENDERIZA EL NUEVO MODAL DE DETALLES */}
+    
       <RatioDetailsModal
         show={isDetailsModalOpen}
         onClose={() => setIsDetailsModalOpen(false)}

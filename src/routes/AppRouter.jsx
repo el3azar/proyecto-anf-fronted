@@ -25,6 +25,7 @@ import HistorialVentas from '../components/proyeccion/HistorialVentas'; // Impor
 import AnalisisHV from '../components/analisis/AnalisisHV';
 import DashboardAnalisis from '../components/analisis/DashboardAnalisis';
 import PaginaEvolucionRatios from '../components/analisis/PaginaEvolucionRatios';
+import EvolucionCuenta from '../components/ratio/EvolucionCuenta';
 
 export default function AppRouter() {
   return (
@@ -64,6 +65,7 @@ export default function AppRouter() {
             <Route path="/analisis" element={<DashboardAnalisis/>} />
             <Route path="/analisis/comparativo" element={<AnalisisHV />} />
             <Route path="/analisis/evolucion-ratios" element={<PaginaEvolucionRatios />} />
+            <Route path="analisis/evolucion-cuentas" element={<EvolucionCuenta/>}/>
 
             <Route path="/proyecciones/cargar" element={<Proyecciones />} />
             <Route path="/proyecciones/historial" element={<HistorialVentas />} />
