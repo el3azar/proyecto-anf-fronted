@@ -44,7 +44,6 @@ export const CategoriaRatio = () => {
     { Header: 'ID', accessor: 'idCategoriaRatio' },
     { Header: 'Nombre de la Categoría', accessor: 'nombreTipo' },
     // 4. Nueva columna para mostrar el nombre del tipo de ratio
-    { Header: 'Tipo de Ratio', accessor: 'nombre_ratio' },
     { Header: 'Descripción', accessor: 'descripcion' },
   ];
 
