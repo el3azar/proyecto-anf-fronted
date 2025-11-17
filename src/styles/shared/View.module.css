@@ -9,7 +9,7 @@
 .viewHeader {
   display: flex;
   justify-content: space-between;
-  align-items: center;
+  align-items: flex-start; /* Alinear al inicio para el subtítulo */
   margin-bottom: 2rem;
   padding-bottom: 1.5rem;
   border-bottom: 1px solid var(--border-color);
@@ -21,28 +21,32 @@
   color: var(--color-darkest);
 }
 
+.viewSubtitle {
+  margin: 0;
+  color: #6c757d; /* Un color secundario */
+  font-size: 1rem;
+  font-weight: 400;
+}
+
 .table {
-  border-collapse: collapse; /* Cambiamos a collapse para el estilo de encabezado clásico */
+  border-collapse: collapse;
   width: 100%;
 }
 
-/* --- SECCIÓN MODIFICADA: ENCABEZADO DE LA TABLA --- */
 .table thead th {
-  background-color: var(--color-darkest); /* El color oscuro que te gustó */
+  background-color: var(--color-darkest);
   color: white;
-  border-bottom: 2px solid var(--color-primary); /* Un acento de color sutil */
+  border-bottom: 2px solid var(--color-primary);
   font-weight: 600;
   text-transform: uppercase;
   font-size: 0.8rem;
   padding: 1rem 1.5rem;
-  text-align: left; /* Alineación estándar */
+  text-align: left;
 }
 
 .table thead th:last-child {
-  text-align: right; /* La columna de acciones se alinea a la derecha */
+  text-align: right;
 }
-/* --- FIN DE LA SECCIÓN MODIFICADA --- */
-
 
 .table tbody tr {
   border-bottom: 1px solid var(--border-color);
@@ -53,10 +57,91 @@
   background-color: #f1f3f5;
 }
 
+/* ESTILOS PARA LA TABLA (ZEBRA STRIPING) */
+.table tbody tr:nth-of-type(odd) {
+  background-color: #f8f9fa;
+}
+
 .table tbody td {
   padding: 1.25rem 1.5rem;
   vertical-align: middle;
 }
+
 .table tbody td:last-child {
   text-align: right;
+}
+
+/* --- ESTILOS CORREGIDOS Y MEJORADOS PARA LA BARRA DE BÚSQUEDA --- */
+
+/* El contenedor principal de la barra de búsqueda */
+.searchWrapper {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem; /* Pequeño espacio entre el ícono y el texto */
+  padding: 0.5rem 0.75rem;
+  border-radius: 8px;
+  background-color: #f8f9fa; /* Un fondo ligeramente gris para que destaque */
+  border: 2px solid var(--border-color);
+  margin-bottom: 2rem;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+/* El ícono, ahora dentro de una etiqueta para mejor usabilidad */
+.searchIconLabel {
+  display: flex; /* Para centrar el ícono si es necesario */
+  align-items: center;
+  justify-content: center;
+  color: #adb5bd;
+  padding-left: 0.25rem;
+  cursor: text; /* Cambia el cursor para indicar que es un área de texto */
+}
+
+/* El campo de texto, ahora sin estilos propios de borde/fondo */
+.searchInput {
+  width: 100%;
+  flex-grow: 1; /* Permite que el input ocupe todo el espacio disponible */
+  border: none;
+  background: transparent;
+  outline: none; /* Quitamos el feo borde al hacer clic */
+  font-size: 1rem;
+  padding: 0.25rem;
+  color: var(--color-dark);
+}
+
+.searchInput::placeholder {
+  color: #adb5bd;
+}
+
+/* El efecto de "foco" se aplica ahora a todo el contenedor */
+.searchWrapper:focus-within {
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px rgba(32, 123, 37, 0.2);
+  background-color: white;
+}
+
+/* --- ESTILOS PARA EL ESTADO VACÍO (EMPTY STATE) --- */
+.emptyState {
+  text-align: center;
+  padding: 4rem 2rem;
+  background-color: #f8f9fa;
+  border: 2px dashed var(--border-color);
+  border-radius: 8px;
+  margin-top: 2rem;
+}
+
+.emptyStateIcon {
+  color: var(--color-neutral);
+  margin-bottom: 1rem;
+}
+
+.emptyStateTitle {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: var(--color-dark);
+}
+
+.emptyStateText {
+  color: #6c757d;
+  max-width: 400px;
+  margin: 0.5rem auto 0;
 }

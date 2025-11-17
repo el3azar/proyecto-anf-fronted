@@ -1,7 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { FaPlus, FaEdit, FaTrash } from 'react-icons/fa';
-import SubMenu from './../shared/SubMenu';
-import { empresasSubMenuLinks } from '../../config/menuConfig';
+import React, { useState, useEffect, useMemo } from 'react';
+import { FaPlus, FaEdit, FaTrash, FaSearch, FaBuilding } from 'react-icons/fa'; // Iconos actualizados
 import { getEmpresas, createEmpresa, updateEmpresa, deleteEmpresa } from '../../services/empresa/empresaService';
 import { Notifier } from '../../utils/Notifier';
 import { EmpresaFormModal } from './EmpresaFormModal';
@@ -13,14 +11,30 @@ export const Empresas = () => {
   const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingEmpresa, setEditingEmpresa] = useState(null);
+  
+  // Estado para el término de búsqueda
+  const [searchTerm, setSearchTerm] = useState('');
 
   const fetchEmpresas = async () => {
-    try { setLoading(true); setEmpresas(await getEmpresas()); } 
+    try { 
+      setLoading(true); 
+      setEmpresas(await getEmpresas()); 
+    } 
     catch (error) { Notifier.error('No se pudieron cargar las empresas.'); } 
     finally { setLoading(false); }
   };
 
   useEffect(() => { fetchEmpresas(); }, []);
+
+  // Lógica de filtrado por búsqueda (se ejecuta solo cuando cambia la lista o el término de búsqueda)
+  const empresasFiltradas = useMemo(() => {
+    if (!searchTerm) {
+      return empresas; // Si no hay búsqueda, devuelve todas
+    }
+    return empresas.filter(empresa => 
+      empresa.nombreEmpresa.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+  }, [empresas, searchTerm]);
 
   const handleOpenCreateModal = () => { setEditingEmpresa(null); setIsModalOpen(true); };
   const handleOpenEditModal = (empresa) => { setEditingEmpresa(empresa); setIsModalOpen(true); };
@@ -57,17 +71,37 @@ export const Empresas = () => {
   };
 
   return (
-    <>
-      <SubMenu links={empresasSubMenuLinks} />  
-      <div className={viewStyles.viewContainer}>
-        <div className={viewStyles.viewHeader}>
-          <h2 className={viewStyles.viewTitle}>Listado de Empresas</h2>
-          <button className={buttonStyles.btnPrimary} onClick={handleOpenCreateModal}>
-            <FaPlus className="me-2" />Nueva Empresa
-          </button>
+    <div className={viewStyles.viewContainer}>
+      {/* --- HEADER MEJORADO --- */}
+      <div className={viewStyles.viewHeader}>
+        <div>
+          <h2 className={viewStyles.viewTitle}>Gestión de Empresas</h2>
+          <p className={viewStyles.viewSubtitle}>Crea, edita y gestiona las empresas del sistema.</p>
         </div>
-        {loading ? <p>Cargando...</p> : (
-          <div className="table-responsive">
+        <button className={buttonStyles.btnPrimary} onClick={handleOpenCreateModal}>
+          <FaPlus className="me-2" />Nueva Empresa
+        </button>
+      </div>
+
+      {/* --- BARRA DE BÚSQUEDA --- */}
+      <div className={viewStyles.searchWrapper}>
+        <label htmlFor="search-input" className={viewStyles.searchIconLabel}>
+          <FaSearch />
+        </label>
+        <input 
+          id="search-input"
+          type="text"
+          placeholder="Buscar por nombre de empresa..."
+          className={viewStyles.searchInput}
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+        />
+      </div>
+
+      {loading ? <p className="text-center">Cargando...</p> : (
+        <div className="table-responsive">
+          {/* Lógica condicional para mostrar tabla o estado vacío */}
+          {empresasFiltradas.length > 0 ? (
             <table className={viewStyles.table}>
               <thead>
                 <tr>
@@ -75,7 +109,7 @@ export const Empresas = () => {
                 </tr>
               </thead>
               <tbody>
-                {empresas.map((e) => (
+                {empresasFiltradas.map((e) => (
                   <tr key={e.empresaId}>
                     <td>{e.empresaId}</td><td>{e.nombreEmpresa}</td><td>{e.empresaNit || 'N/A'}</td><td>{e.nombreSector}</td><td>{e.usuarioId}</td>
                     <td className="text-end">
@@ -86,10 +120,24 @@ export const Empresas = () => {
                 ))}
               </tbody>
             </table>
-          </div>
-        )}
-      </div>
+          ) : (
+            // --- NUEVO ESTADO VACÍO ---
+            <div className={viewStyles.emptyState}>
+              <FaBuilding size={50} className={viewStyles.emptyStateIcon} />
+              <h3 className={viewStyles.emptyStateTitle}>
+                {searchTerm ? 'No se encontraron empresas' : 'Aún no hay empresas registradas'}
+              </h3>
+              <p className={viewStyles.emptyStateText}>
+                {searchTerm 
+                  ? `Intenta con otro término de búsqueda.`
+                  : '¡Crea la primera para empezar a trabajar!'}
+              </p>
+            </div>
+          )}
+        </div>
+      )}
+      
       <EmpresaFormModal show={isModalOpen} onClose={handleCloseModal} onSave={handleSave} initialData={editingEmpresa} />
-    </>
+    </div>
   );
 };

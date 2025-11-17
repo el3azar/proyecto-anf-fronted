@@ -18,11 +18,6 @@ export const mainLinks = [
  * Configuraciones centralizadas para los sub-menús de cada módulo.
  */
 
-export const empresasSubMenuLinks = [
-  { to: '/empresas', label: 'Ver Empresas' },
-  { to: '/empresas/nuevo', label: 'Registrar Empresa' },
-  { to: '/empresas/inactivas', label: 'Ver Inactivas' },
-];
 
 export const sectoresSubMenuLinks = [
   { to: '/ratios', label: 'Ratio' },
