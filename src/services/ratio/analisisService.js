@@ -1,4 +1,4 @@
-// Definimos la URL base de la API para no repetirla
+
 const API_BASE_URL = 'http://localhost:8080/api/v1';
 
 /**
@@ -34,6 +34,11 @@ export const getCuentasTree = () => {
   return apiFetch(`${API_BASE_URL}/cuentas-maestro/tree`);
 };
 
+export const getTiposRatio = () => {
+  return apiFetch(`${API_BASE_URL}/tipos-ratio`);
+};
+
+
 /**
  * Obtiene los saldos anuales de una cuenta específica para una empresa.
  * @param {string} nombreEmpresa - El nombre de la empresa.
@@ -44,4 +49,18 @@ export const getSaldosCuenta = (nombreEmpresa, nombreCuenta) => {
   const params = new URLSearchParams({ nombreEmpresa, nombreCuenta });
   const url = `${API_BASE_URL}/estados-financieros/saldos-cuenta-por-nombre?${params.toString()}`;
   return apiFetch(url);
+};
+
+/**
+ * Obtiene la evolución de ratios para una empresa dada.
+ * @param {number} empresaId
+ * @param {Array<string>} ratios
+ */
+export const getEvolucionRatios = (empresaId, ratios) => {
+  const params = new URLSearchParams({
+    empresaId,
+    ratios: ratios.join(','),
+  });
+
+  return apiFetch(`${API_BASE_URL}/analisis/evolucion-ratios?${params.toString()}`);
 };

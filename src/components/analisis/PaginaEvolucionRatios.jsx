@@ -1,12 +1,18 @@
 import React, { useState, useEffect } from 'react';
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
+import {
+  LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer
+} from 'recharts';
 
-// --- 1. Importaciones de Estilo del Proyecto ---
+// --- Servicios ---
+import { getEvolucionRatios, getTiposRatio } from '../../services/ratio/analisisService';
+import { getEmpresas } from '../../services/empresa/empresaService';
+
+// --- Estilos del Proyecto ---
 import viewStyles from '../../styles/shared/View.module.css';
 import buttonStyles from '../../styles/shared/Button.module.css';
-import styles from '../../styles/analisis/EvolucionRatios.module.css'; 
+import styles from '../../styles/analisis/EvolucionRatios.module.css';
 
-
+// --- Material UI ---
 import {
   FormControl,
   InputLabel,
@@ -17,119 +23,142 @@ import {
   Box
 } from '@mui/material';
 
-const lineColors = [
-  '#207B25', 
-  '#0088FE', 
-  '#FF8042', 
-  '#FFBB28', 
-  '#8884d8'  
-];
-
-
-const ratiosDisponibles = [
-  { value: 'LIQUIDEZ_CORRIENTE', label: 'Liquidez Corriente' },
-  { value: 'PRUEBA_ACIDA', label: 'Prueba Ácida' },
-  { value: 'ENDEUDAMIENTO', label: 'Nivel de Endeudamiento' },
-  { value: 'ROE', label: 'ROE (Rentabilidad sobre Patrimonio)' },
-  { value: 'ROA', label: 'ROA (Rentabilidad sobre Activos)' },
-];
+// --- Colores de líneas ---
+const lineColors = ['#207B25', '#0088FE', '#FF8042', '#FFBB28', '#8884d8'];
 
 const PaginaEvolucionRatios = () => {
+  // --- Estados ---
   const [empresas, setEmpresas] = useState([]);
-  const [empresaSel, setEmpresaSel] = useState('');
-  const [ratiosSel, setRatiosSel] = useState([]);
+  const [empresaSel, setEmpresaSel] = useState("");
+
+  const [ratiosDisponibles, setRatiosDisponibles] = useState([]);
+  const [ratiosSel, setRatiosSel] = useState([]); // <-- Ahora será [5, 6] (números)
+
   const [datosGraficos, setDatosGraficos] = useState([]);
   const [loading, setLoading] = useState(false);
 
+  // -----------------------------
+  // Cargar Empresas y Tipos Ratio
+  // -----------------------------
+  useEffect(() => {
+    const cargarDatos = async () => {
+      try {
+        const emp = await getEmpresas();
+        setEmpresas(emp);
 
+        const ratios = await getTiposRatio();
+        setRatiosDisponibles(ratios);
+
+      } catch (error) {
+        console.error(error);
+        alert("Error cargando información inicial.");
+      }
+    };
+
+    cargarDatos();
+  }, []);
+
+  // -----------------------------
+  // Ejecutar generación de datos
+  // -----------------------------
   const handleGenerarGraficos = async () => {
     if (!empresaSel || ratiosSel.length === 0) {
-      alert('Por favor, seleccione una empresa y al menos un ratio.');
+      alert("Seleccione una empresa y al menos un ratio.");
       return;
     }
+
     setLoading(true);
     setDatosGraficos([]);
-    
-    const dataSimulada = [
-      { anio: '2021', LIQUIDEZ_CORRIENTE: 1.5, ROE: 0.12, ENDEUDAMIENTO: 0.45, PRUEBA_ACIDA: 0.8, ROA: 0.05 },
-      { anio: '2022', LIQUIDEZ_CORRIENTE: 1.7, ROE: 0.14, ENDEUDAMIENTO: 0.42, PRUEBA_ACIDA: 0.9, ROA: 0.07 },
-      { anio: '2023', LIQUIDEZ_CORRIENTE: 1.6, ROE: 0.13, ENDEUDAMIENTO: 0.44, PRUEBA_ACIDA: 0.85, ROA: 0.06 },
-    ];
 
-    setDatosGraficos(dataSimulada);
+    try {
+      // 'ratiosSel' ahora es [5, 6, 7] (números), que coincide
+      // con lo que espera el backend (Instrucción #2)
+      const response = await getEvolucionRatios(empresaSel, ratiosSel);
+      setDatosGraficos(response);
+
+    } catch (error) {
+      console.error(error);
+      alert("Error obteniendo datos de análisis.");
+    }
+
     setLoading(false);
   };
 
+  // -----------------------------
+  // Selección de Ratios (MUI)
+  // -----------------------------
+  
   const handleRatioChange = (event) => {
-    const { target: { value } } = event;
-    setRatiosSel(typeof value === 'string' ? value.split(',') : value);
+    const { value } = event.target;
+    // Convertir SIEMPRE a números
+    setRatiosSel(
+      typeof value === "string"
+        ? value.split(",").map(v => Number(v)) // Convierte ["5","6"] a [5, 6]
+        : value.map(v => Number(v))           // Convierte ["5","6"] a [5, 6]
+    );
   };
 
   return (
-    // --- 4. Usa el Contenedor de Vista Estándar ---
     <div className={viewStyles.viewContainer}>
+
       <div className={viewStyles.viewHeader}>
-        <h2 className={viewStyles.viewTitle}>
-          Evolución de Ratios Financieros
-        </h2>
+        <h2 className={viewStyles.viewTitle}>Evolución de Ratios Financieros</h2>
       </div>
-      
-      {/* --- 5. Usa el FilterBar (CSS Modules) en lugar de Grid (MUI) --- */}
+
+      {/* ------------------ FILTROS ------------------ */}
       <div className={styles.filterBar}>
 
-        {/* Selector de Empresa (Traducido a HTML Estándar) */}
+        {/* Selector Empresa */}
         <div className={styles.formControl}>
-          <label htmlFor="empresa-select">Empresa</label>
-          <select 
-            id="empresa-select"
-            value={empresaSel} 
-            onChange={e => setEmpresaSel(e.target.value)}
+          <label>Empresa</label>
+          <select
+            value={empresaSel}
+            onChange={(e) => setEmpresaSel(e.target.value)}
           >
             <option value="">Seleccione una empresa</option>
-            {/* {empresas.map(emp => (
-              <option key={emp.id} value={emp.id}>{emp.nombre}</option>
-            ))} */}
-            <option value={1}>Empresa Mapfre (Simulada)</option>
+            {empresas.map((e) => (
+              <option key={e.empresaId} value={e.empresaId}>
+                {e.nombreEmpresa}
+              </option>
+            ))}
           </select>
         </div>
-        
-        {/* Selector de Ratios (Mantenemos MUI por complejidad) */}
-        {/* Le damos 'flex-grow: 2' para que ocupe más espacio que los otros */}
+
+        {/* Selector de Ratios - MUI */}
         <div className={styles.formControl} style={{ flexGrow: 2 }}>
           <label>Ratios a Graficar</label>
-          {/* Este FormControl es de MUI, pero se adapta al layout */}
-          <FormControl fullWidth variant="outlined" size="small">
-            <InputLabel id="ratio-label-id" sx={{fontSize: '0.9rem', top: '-2px'}}>
-              Ratios a Graficar
-            </InputLabel>
+          <FormControl fullWidth size="small">
+            <InputLabel id="ratios-label">Ratios</InputLabel>
             <Select
-              labelId="ratio-label-id"
+              labelId="ratios-label"
               multiple
               value={ratiosSel}
               onChange={handleRatioChange}
-              input={<OutlinedInput label="Ratios a Graficar" />}
+              input={<OutlinedInput label="Ratios" />}
               renderValue={(selected) => (
-                <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5, paddingTop: '5px' }}>
-                  {selected.map((value) => (
+                <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
+                  {selected.map((id) => ( // 'id' ahora es un NÚMERO
                     <Chip
-                      key={value}
-                      label={ratiosDisponibles.find(r => r.value === value)?.label}
+                      key={id}
+                      // Esta comparación (número === número) AHORA SÍ FUNCIONA
+                      label={ratiosDisponibles.find(r => r.id_tipo_ratio === id)?.nombre_ratio}
                       size="small"
                     />
                   ))}
                 </Box>
               )}
             >
-              {ratiosDisponibles.map((ratio) => (
-                <MenuItem key={ratio.value} value={ratio.value}>
-                  {ratio.label}
+              {ratiosDisponibles.map((r) => (
+                // El 'value' es un número (id_tipo_ratio)
+                <MenuItem key={r.id_tipo_ratio} value={r.id_tipo_ratio}>
+                  {r.nombre_ratio}
                 </MenuItem>
               ))}
             </Select>
           </FormControl>
         </div>
 
-        {/* Botón (Traducido a buttonStyles) */}
+        {/* Botón Generar */}
         <button
           className={buttonStyles.btnPrimary}
           onClick={handleGenerarGraficos}
@@ -138,36 +167,40 @@ const PaginaEvolucionRatios = () => {
           {loading ? "Generando..." : "Generar"}
         </button>
       </div>
-      
-      {/* --- 6. Área de Gráficos (Traducido a CSS Modules) --- */}
-      {loading && <p>Calculando datos...</p>}
-      
+
+      {/* ------------------ GRÁFICOS ------------------ */}
+      {loading && <p>Calculando datos…</p>}
+
       {datosGraficos.length > 0 && (
         <div className={styles.graphArea}>
-          {ratiosSel.map((ratioValue, index) => {
-            const ratioLabel = ratiosDisponibles.find(r => r.value === ratioValue)?.label;
+          {ratiosSel.map((ratioId, index) => { // 'ratioId' es un NÚMERO (ej. 5)
+            
+            // Esta comparación (número === número) AHORA SÍ FUNCIONA
+            const ratioInfo = ratiosDisponibles.find(r => r.id_tipo_ratio === ratioId);
+
             return (
-              <div className={styles.graphItem} key={ratioValue}>
-                <h3 className={styles.graphTitle}>{ratioLabel}</h3>
-                {/* ResponsiveContainer ahora tiene un contenedor padre (graphItem)
-                    que define su tamaño, solucionando el problema de "angosto" */}
+              <div className={styles.graphItem} key={ratioId}>
+                <h3 className={styles.graphTitle}>{ratioInfo?.nombre_ratio}</h3>
+
                 <ResponsiveContainer width="100%" height="100%">
-                    <LineChart data={datosGraficos}>
-                      <CartesianGrid strokeDasharray="3 3" />
-                      <XAxis dataKey="anio" />
-                      <YAxis domain={['auto', 'auto']} />
-                      <Tooltip />
-                      <Legend />
-                      <Line 
-                        type="monotone" 
-                        dataKey={ratioValue} 
-                            // --- 7. Asigna colores de la paleta ---
-                        stroke={lineColors[index % lineColors.length]} 
-                        strokeWidth={2}
-                        name={ratioLabel} 
-                      />
-                    </LineChart>
-                  </ResponsiveContainer>
+                  <LineChart data={datosGraficos}>
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis dataKey="anio" />
+                    <YAxis domain={['auto', 'auto']} />
+                    <Tooltip />
+                    <Legend />
+
+                    <Line
+                      type="monotone"
+                      // Convierte el ID (ej. 5) a STRING (ej. "5")
+                      // Esto coincide con el JSON del backend {"anio": 2023, "5": 1.45}
+                      dataKey={String(ratioId)} 
+                      stroke={lineColors[index % lineColors.length]}
+                      strokeWidth={2}
+                      name={ratioInfo?.nombre_ratio}
+                    />
+                  </LineChart>
+                </ResponsiveContainer>
               </div>
             );
           })}
